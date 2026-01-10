@@ -7,6 +7,7 @@ REST API сервер для удалённого управления [sing-box
 ## Возможности
 
 - Запуск/остановка/перезагрузка sing-box процесса
+- **Авто-рестарт при падении** с экспоненциальной задержкой
 - Мониторинг статуса и здоровья сервера
 - Просмотр логов в реальном времени
 - Валидация конфигурации перед запуском
@@ -68,67 +69,19 @@ bun run dev
 | `SINGBOX_BIN` | ./bin/sing-box | Путь к sing-box бинарнику |
 | `SINGBOX_CONFIG_PATH` | ./data/config.json | Путь к конфигурации |
 | `SINGBOX_WORKING_DIR` | ./data | Рабочая директория |
+| `SINGBOX_AUTO_RESTART` | true | Авто-рестарт при падении |
+| `SINGBOX_RESTART_DELAY` | 1000 | Начальная задержка рестарта (мс) |
+| `SINGBOX_MAX_RESTARTS` | 5 | Макс. рестартов за окно |
+| `SINGBOX_RESTART_WINDOW` | 60000 | Временное окно для лимита (мс) |
 | `LOG_LEVEL` | info | Уровень логирования |
 
-## API Endpoints
+## API
 
 Базовый URL: `http://localhost:3333`
 
-### Аутентификация
+Если установлен `API_KEY`, запросы должны содержать заголовок `Authorization: Bearer <key>` или `X-API-Key: <key>`.
 
-Если установлен `API_KEY`, запросы должны содержать заголовок:
-- `Authorization: Bearer <key>` или
-- `X-API-Key: <key>`
-
-### Endpoints
-
-| Метод | Путь | Описание |
-|-------|------|----------|
-| `GET` | `/health` | Проверка здоровья сервера |
-| `GET` | `/server/status` | Статус sing-box процесса |
-| `POST` | `/server/reload` | Перезагрузка конфигурации |
-| `GET` | `/server/logs?limit=100` | Получение логов |
-
-### Формат ответа
-
-```json
-{
-  "success": true,
-  "data": { ... }
-}
-```
-
-При ошибке:
-
-```json
-{
-  "success": false,
-  "error": "Error message",
-  "code": "ERROR_CODE"
-}
-```
-
-### Примеры запросов
-
-```bash
-# Проверка здоровья
-curl http://localhost:3333/health
-
-# Статус sing-box (с аутентификацией)
-curl -H "X-API-Key: your-api-key" http://localhost:3333/server/status
-
-# Перезагрузка конфигурации
-curl -X POST -H "X-API-Key: your-api-key" http://localhost:3333/server/reload
-
-# Получение последних 50 строк логов
-curl -H "X-API-Key: your-api-key" "http://localhost:3333/server/logs?limit=50"
-```
-
-## API Документация
-
-В режиме разработки доступна интерактивная документация:
-- Scalar UI: `http://localhost:3333/docs`
-- OpenAPI JSON: `http://localhost:3333/openapi.json`
+Интерактивная документация доступна по адресу `http://localhost:3333/docs`
 
 ## Docker
 

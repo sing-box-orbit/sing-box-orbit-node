@@ -15,12 +15,21 @@ const healthResponseSchema = Type.Object({
 	version: Type.String(),
 });
 
+const restartStatsSchema = Type.Object({
+	enabled: Type.Boolean(),
+	count: Type.Number(),
+	lastRestartAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
+	nextRestartIn: Type.Union([Type.Number(), Type.Null()]),
+	maxRestartsReached: Type.Boolean(),
+});
+
 const serverStatusSchema = Type.Object({
 	running: Type.Boolean(),
 	pid: Type.Union([Type.Number(), Type.Null()]),
 	uptime: Type.Union([Type.Number(), Type.Null()]),
 	startedAt: Type.Union([Type.String({ format: 'date-time' }), Type.Null()]),
 	version: Type.Union([Type.String(), Type.Null()]),
+	restartStats: restartStatsSchema,
 });
 
 const apiResponseSchema = <T extends ReturnType<typeof Type.Object>>(dataSchema: T) =>
@@ -226,6 +235,31 @@ export const fetsRouter = createRouter({
 					logs,
 					total: logs.length,
 				},
+			});
+		},
+	})
+	.route({
+		method: 'POST',
+		path: '/server/restart-stats/reset',
+		description: 'Reset restart statistics and clear max restarts flag',
+		tags: ['Server'],
+		schemas: {
+			request: {
+				headers: authHeadersSchema,
+			},
+			responses: {
+				200: apiResponseSchema(restartStatsSchema),
+				401: errorResponseSchema,
+			},
+		},
+		handler: (request) => {
+			const authError = checkAuth(request.headers);
+			if (authError) return authError;
+
+			processService.resetRestartStats();
+			return FetsResponse.json({
+				success: true,
+				data: processService.getRestartStats(),
 			});
 		},
 	});

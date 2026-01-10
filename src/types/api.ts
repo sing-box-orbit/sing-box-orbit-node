@@ -1,9 +1,18 @@
+export interface RestartStats {
+	enabled: boolean;
+	count: number;
+	lastRestartAt: string | null;
+	nextRestartIn: number | null;
+	maxRestartsReached: boolean;
+}
+
 export interface ServerStatus {
 	running: boolean;
 	pid: number | null;
 	uptime: number | null;
 	startedAt: string | null;
 	version: string | null;
+	restartStats: RestartStats;
 }
 
 export interface ApiResponse<T = unknown> {

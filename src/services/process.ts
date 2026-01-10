@@ -1,6 +1,6 @@
 import { type Subprocess, spawn } from 'bun';
 import { config } from '@/config';
-import type { ServerStatus } from '@/types';
+import type { RestartStats, ServerStatus } from '@/types';
 import { ConfigValidationError, ProcessError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
@@ -11,6 +11,12 @@ class ProcessService {
 	private startedAt: Date | null = null;
 	private version: string | null = null;
 	private logs: string[] = [];
+	private restartCount = 0;
+	private restartTimestamps: number[] = [];
+	private lastRestartAt: Date | null = null;
+	private restartTimer: ReturnType<typeof setTimeout> | null = null;
+	private maxRestartsReached = false;
+	private isShuttingDown = false;
 
 	async start(): Promise<void> {
 		const configPath = config.singbox.configPath;
@@ -47,6 +53,10 @@ class ProcessService {
 			logger.info('sing-box process exited', { exitCode: code });
 			this.process = null;
 			this.startedAt = null;
+
+			if (!this.isShuttingDown && config.singbox.autoRestart) {
+				this.scheduleRestart(code);
+			}
 		});
 
 		await Bun.sleep(500);
@@ -59,6 +69,9 @@ class ProcessService {
 	}
 
 	async stop(): Promise<void> {
+		this.isShuttingDown = true;
+		this.cancelScheduledRestart();
+
 		if (!this.process || this.process.killed) {
 			return;
 		}
@@ -110,7 +123,27 @@ class ProcessService {
 			uptime,
 			startedAt: this.startedAt?.toISOString() ?? null,
 			version: this.version,
+			restartStats: this.getRestartStats(),
 		};
+	}
+
+	getRestartStats(): RestartStats {
+		return {
+			enabled: config.singbox.autoRestart,
+			count: this.restartCount,
+			lastRestartAt: this.lastRestartAt?.toISOString() ?? null,
+			nextRestartIn: this.getNextRestartIn(),
+			maxRestartsReached: this.maxRestartsReached,
+		};
+	}
+
+	resetRestartStats(): void {
+		this.restartCount = 0;
+		this.restartTimestamps = [];
+		this.lastRestartAt = null;
+		this.maxRestartsReached = false;
+		this.cancelScheduledRestart();
+		logger.info('Restart stats reset');
 	}
 
 	getLogs(limit?: number): string[] {
@@ -118,6 +151,63 @@ class ProcessService {
 			return this.logs.slice(-limit);
 		}
 		return [...this.logs];
+	}
+
+	private scheduleRestart(exitCode: number | null): void {
+		const now = Date.now();
+		const windowStart = now - config.singbox.restartWindow;
+		this.restartTimestamps = this.restartTimestamps.filter((ts) => ts > windowStart);
+
+		if (this.restartTimestamps.length >= config.singbox.maxRestarts) {
+			this.maxRestartsReached = true;
+			logger.error('Max restarts reached, giving up', {
+				restarts: this.restartTimestamps.length,
+				window: config.singbox.restartWindow,
+				maxRestarts: config.singbox.maxRestarts,
+			});
+			return;
+		}
+
+		const backoffMultiplier = Math.min(this.restartTimestamps.length, 5);
+		const delay = config.singbox.restartDelay * 2 ** backoffMultiplier;
+
+		logger.info('Scheduling restart', {
+			exitCode,
+			delay,
+			restartCount: this.restartTimestamps.length + 1,
+			maxRestarts: config.singbox.maxRestarts,
+		});
+
+		this.restartTimer = setTimeout(async () => {
+			this.restartTimer = null;
+			this.restartCount++;
+			this.restartTimestamps.push(Date.now());
+			this.lastRestartAt = new Date();
+
+			try {
+				await this.start();
+				logger.info('Auto-restart successful', { restartCount: this.restartCount });
+			} catch (error) {
+				logger.error('Auto-restart failed', {
+					error: error instanceof Error ? error.message : String(error),
+					restartCount: this.restartCount,
+				});
+			}
+		}, delay);
+	}
+
+	private cancelScheduledRestart(): void {
+		if (this.restartTimer) {
+			clearTimeout(this.restartTimer);
+			this.restartTimer = null;
+		}
+	}
+
+	private getNextRestartIn(): number | null {
+		if (!this.restartTimer) {
+			return null;
+		}
+		return config.singbox.restartDelay;
 	}
 
 	private addLog(line: string): void {

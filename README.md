@@ -7,6 +7,7 @@ REST API server for remote management of [sing-box](https://sing-box.sagernet.or
 ## Features
 
 - Start/stop/reload sing-box process
+- **Auto-restart on crash** with exponential backoff
 - Monitor server status and health
 - Real-time log viewing
 - Configuration validation before startup
@@ -68,67 +69,19 @@ Environment variables (`.env`):
 | `SINGBOX_BIN` | ./bin/sing-box | Path to sing-box binary |
 | `SINGBOX_CONFIG_PATH` | ./data/config.json | Config file path |
 | `SINGBOX_WORKING_DIR` | ./data | Working directory |
+| `SINGBOX_AUTO_RESTART` | true | Auto-restart on crash |
+| `SINGBOX_RESTART_DELAY` | 1000 | Initial restart delay (ms) |
+| `SINGBOX_MAX_RESTARTS` | 5 | Max restarts within window |
+| `SINGBOX_RESTART_WINDOW` | 60000 | Time window for restart limit (ms) |
 | `LOG_LEVEL` | info | Log level |
 
-## API Endpoints
+## API
 
 Base URL: `http://localhost:3333`
 
-### Authentication
+If `API_KEY` is set, requests must include header `Authorization: Bearer <key>` or `X-API-Key: <key>`.
 
-If `API_KEY` is set, requests must include header:
-- `Authorization: Bearer <key>` or
-- `X-API-Key: <key>`
-
-### Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/health` | Server health check |
-| `GET` | `/server/status` | sing-box process status |
-| `POST` | `/server/reload` | Reload configuration |
-| `GET` | `/server/logs?limit=100` | Get logs |
-
-### Response Format
-
-```json
-{
-  "success": true,
-  "data": { ... }
-}
-```
-
-On error:
-
-```json
-{
-  "success": false,
-  "error": "Error message",
-  "code": "ERROR_CODE"
-}
-```
-
-### Request Examples
-
-```bash
-# Health check
-curl http://localhost:3333/health
-
-# sing-box status (with auth)
-curl -H "X-API-Key: your-api-key" http://localhost:3333/server/status
-
-# Reload configuration
-curl -X POST -H "X-API-Key: your-api-key" http://localhost:3333/server/reload
-
-# Get last 50 log lines
-curl -H "X-API-Key: your-api-key" "http://localhost:3333/server/logs?limit=50"
-```
-
-## API Documentation
-
-In development mode, interactive documentation is available:
-- Scalar UI: `http://localhost:3333/docs`
-- OpenAPI JSON: `http://localhost:3333/openapi.json`
+Interactive documentation available at `http://localhost:3333/docs`
 
 ## Docker
 
