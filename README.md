@@ -17,6 +17,7 @@ REST API server for remote management of [sing-box](https://sing-box.sagernet.or
 - Configuration validation before startup
 - Automatic OpenAPI documentation
 - Optional API-key authentication
+- **Rate limiting** for DDoS protection
 
 ## Requirements
 
@@ -80,6 +81,9 @@ Environment variables (`.env`):
 | `SINGBOX_RESTART_DELAY` | 1000 | Initial restart delay (ms) |
 | `SINGBOX_MAX_RESTARTS` | 5 | Max restarts within window |
 | `SINGBOX_RESTART_WINDOW` | 60000 | Time window for restart limit (ms) |
+| `RATE_LIMIT_ENABLED` | true | Enable rate limiting |
+| `RATE_LIMIT_MAX_REQUESTS` | 100 | Max requests per window |
+| `RATE_LIMIT_WINDOW_MS` | 60000 | Time window (ms) |
 | `LOG_LEVEL` | info | Log level |
 
 ## API

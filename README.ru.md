@@ -17,6 +17,7 @@ REST API сервер для удалённого управления [sing-box
 - Валидация конфигурации перед запуском
 - Автоматическая OpenAPI документация
 - Опциональная API-key аутентификация
+- **Rate limiting** для защиты от DDoS
 
 ## Требования
 
@@ -80,6 +81,9 @@ bun run dev
 | `SINGBOX_RESTART_DELAY` | 1000 | Начальная задержка рестарта (мс) |
 | `SINGBOX_MAX_RESTARTS` | 5 | Макс. рестартов за окно |
 | `SINGBOX_RESTART_WINDOW` | 60000 | Временное окно для лимита (мс) |
+| `RATE_LIMIT_ENABLED` | true | Включить rate limiting |
+| `RATE_LIMIT_MAX_REQUESTS` | 100 | Макс. запросов за окно |
+| `RATE_LIMIT_WINDOW_MS` | 60000 | Временное окно (мс) |
 | `LOG_LEVEL` | info | Уровень логирования |
 
 ## API

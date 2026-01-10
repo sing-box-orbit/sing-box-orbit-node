@@ -23,7 +23,8 @@
     "@sinclair/typebox": "^0.34.47",
     "envalid": "^8.1.1",
     "fets": "^0.8.5",
-    "hono": "^4.11.3"
+    "hono": "^4.11.3",
+    "hono-rate-limiter": "^0.5.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.11",

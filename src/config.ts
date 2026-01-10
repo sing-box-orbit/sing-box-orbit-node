@@ -14,6 +14,9 @@ const env = cleanEnv(process.env, {
 	HOST: str({ default: '0.0.0.0', desc: 'Server host' }),
 	PORT: num({ default: 3333, desc: 'Server port' }),
 	API_KEY: str({ default: '', desc: 'API key for authentication' }),
+	RATE_LIMIT_ENABLED: bool({ default: true, desc: 'Enable rate limiting' }),
+	RATE_LIMIT_MAX_REQUESTS: num({ default: 100, desc: 'Max requests per window' }),
+	RATE_LIMIT_WINDOW_MS: num({ default: 60000, desc: 'Time window in milliseconds' }),
 	SINGBOX_BIN: str({ default: 'sing-box', desc: 'Path to sing-box binary' }),
 	SINGBOX_CONFIG_PATH: str({
 		default: '/etc/sing-box/config.json',
@@ -33,6 +36,11 @@ export const config = {
 	host: env.HOST,
 	port: env.PORT,
 	apiKey: env.API_KEY,
+	rateLimit: {
+		enabled: env.RATE_LIMIT_ENABLED,
+		maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
+		windowMs: env.RATE_LIMIT_WINDOW_MS,
+	},
 	singbox: {
 		binary: resolvePath(env.SINGBOX_BIN),
 		configPath: resolvePath(env.SINGBOX_CONFIG_PATH),
