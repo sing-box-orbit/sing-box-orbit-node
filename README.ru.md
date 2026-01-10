@@ -108,25 +108,6 @@ docker run -d \
   sing-box-orbit-node
 ```
 
-## Структура проекта
-
-```
-sing-box-orbit-node/
-├── src/
-│   ├── index.ts          # Точка входа
-│   ├── app.ts            # Hono приложение
-│   ├── config.ts         # Конфигурация
-│   ├── api/              # API роуты
-│   ├── services/         # Бизнес-логика
-│   ├── middleware/       # Middleware
-│   ├── types/            # TypeScript типы
-│   └── utils/            # Утилиты
-├── scripts/              # Скрипты
-├── bin/                  # sing-box бинарник
-├── data/                 # Рабочие данные
-└── dist/                 # Скомпилированный код
-```
-
 ## Технологии
 
 - **Runtime**: [Bun](https://bun.sh/)
