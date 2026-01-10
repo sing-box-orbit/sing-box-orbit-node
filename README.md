@@ -1,5 +1,9 @@
 # sing-box-orbit-node
 
+[![CI](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml/badge.svg)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/lookgoodmeat/5c15334bebb54130f734a69db622379c/raw/coverage.json)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 REST API server for remote management of [sing-box](https://sing-box.sagernet.org/) — universal proxy platform.
 
 **[🇷🇺 Русская версия](README.ru.md)**
@@ -55,6 +59,9 @@ bun run dev
 | `bun run lint:fix` | Auto-fix lint errors |
 | `bun run format` | Format code |
 | `bun run typecheck` | TypeScript type checking |
+| `bun run test` | Run tests |
+| `bun run test:watch` | Run tests in watch mode |
+| `bun run test:coverage` | Run tests with coverage report |
 
 ## Configuration
 
