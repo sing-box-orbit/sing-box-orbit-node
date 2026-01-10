@@ -3,13 +3,16 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { fetsRouter } from './api/fets-router';
 import { config } from './config';
-import { rateLimiter, requestLogger } from './middleware';
+import { authMiddleware, errorHandler, rateLimiter, requestLogger } from './middleware';
 
 const app = new Hono();
+
+app.onError(errorHandler);
 
 app.use('*', cors());
 app.use('*', rateLimiter);
 app.use('*', requestLogger);
+app.use('*', authMiddleware);
 
 // OpenAPI docs available only in development
 if (config.isDev) {

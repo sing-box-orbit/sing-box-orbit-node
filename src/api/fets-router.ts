@@ -1,5 +1,4 @@
 import { createRouter, Response as FetsResponse, Type } from 'fets';
-import { config } from '@/config';
 import { processService } from '@/services';
 import { AppError } from '@/utils/errors';
 
@@ -76,32 +75,6 @@ function handleError(error: unknown) {
 	);
 }
 
-function checkAuth(headers: { get(name: string): string | null }) {
-	if (!config.apiKey) {
-		return null;
-	}
-
-	const authHeader = headers.get('authorization');
-	const apiKeyHeader = headers.get('x-api-key');
-
-	let token: string | undefined;
-
-	if (authHeader?.startsWith('Bearer ')) {
-		token = authHeader.slice(7);
-	} else if (apiKeyHeader) {
-		token = apiKeyHeader;
-	}
-
-	if (!token || token !== config.apiKey) {
-		return FetsResponse.json(
-			{ success: false as const, error: 'Invalid or missing API key', code: 'UNAUTHORIZED' },
-			{ status: 401 },
-		);
-	}
-
-	return null;
-}
-
 export const fetsRouter = createRouter({
 	landingPage: false,
 	openAPI: {
@@ -139,10 +112,7 @@ export const fetsRouter = createRouter({
 				401: errorResponseSchema,
 			},
 		},
-		handler: (request) => {
-			const authError = checkAuth(request.headers);
-			if (authError) return authError;
-
+		handler: () => {
 			return FetsResponse.json({
 				status: 'ok' as const,
 				timestamp: new Date().toISOString(),
@@ -164,10 +134,7 @@ export const fetsRouter = createRouter({
 				401: errorResponseSchema,
 			},
 		},
-		handler: async (request) => {
-			const authError = checkAuth(request.headers);
-			if (authError) return authError;
-
+		handler: async () => {
 			const status = await processService.getStatus();
 			return FetsResponse.json({
 				success: true,
@@ -190,10 +157,7 @@ export const fetsRouter = createRouter({
 				500: errorResponseSchema,
 			},
 		},
-		handler: async (request) => {
-			const authError = checkAuth(request.headers);
-			if (authError) return authError;
-
+		handler: async () => {
 			try {
 				const result = await processService.reload();
 				return FetsResponse.json({
@@ -221,9 +185,6 @@ export const fetsRouter = createRouter({
 			},
 		},
 		handler: (request) => {
-			const authError = checkAuth(request.headers);
-			if (authError) return authError;
-
 			const url = new URL(request.url);
 			const limitParam = url.searchParams.get('limit');
 			const limit = limitParam ? Number.parseInt(limitParam, 10) : undefined;
@@ -252,10 +213,7 @@ export const fetsRouter = createRouter({
 				401: errorResponseSchema,
 			},
 		},
-		handler: (request) => {
-			const authError = checkAuth(request.headers);
-			if (authError) return authError;
-
+		handler: () => {
 			processService.resetRestartStats();
 			return FetsResponse.json({
 				success: true,

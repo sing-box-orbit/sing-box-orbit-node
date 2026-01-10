@@ -229,13 +229,18 @@ describe('API with Authentication', () => {
 				isDev: true,
 				isProd: false,
 				apiKey: API_KEY,
+				rateLimit: {
+					enabled: false,
+					maxRequests: 100,
+					windowMs: 60000,
+				},
 				logLevel: 'error',
 			},
 		}));
 
-		const { fetsRouter } = await import('@/api/fets-router');
+		const { app: authApp } = await import('@/app');
 
-		const res = await fetsRouter.fetch(new Request('http://localhost/health'));
+		const res = await authApp.request('/health');
 
 		expect(res.status).toBe(401);
 
@@ -250,19 +255,22 @@ describe('API with Authentication', () => {
 				isDev: true,
 				isProd: false,
 				apiKey: API_KEY,
+				rateLimit: {
+					enabled: false,
+					maxRequests: 100,
+					windowMs: 60000,
+				},
 				logLevel: 'error',
 			},
 		}));
 
-		const { fetsRouter } = await import('@/api/fets-router');
+		const { app: authApp } = await import('@/app');
 
-		const res = await fetsRouter.fetch(
-			new Request('http://localhost/health', {
-				headers: {
-					Authorization: `Bearer ${API_KEY}`,
-				},
-			}),
-		);
+		const res = await authApp.request('/health', {
+			headers: {
+				Authorization: `Bearer ${API_KEY}`,
+			},
+		});
 
 		expect(res.status).toBe(200);
 	});
@@ -273,19 +281,22 @@ describe('API with Authentication', () => {
 				isDev: true,
 				isProd: false,
 				apiKey: API_KEY,
+				rateLimit: {
+					enabled: false,
+					maxRequests: 100,
+					windowMs: 60000,
+				},
 				logLevel: 'error',
 			},
 		}));
 
-		const { fetsRouter } = await import('@/api/fets-router');
+		const { app: authApp } = await import('@/app');
 
-		const res = await fetsRouter.fetch(
-			new Request('http://localhost/health', {
-				headers: {
-					'X-API-Key': API_KEY,
-				},
-			}),
-		);
+		const res = await authApp.request('/health', {
+			headers: {
+				'X-API-Key': API_KEY,
+			},
+		});
 
 		expect(res.status).toBe(200);
 	});
