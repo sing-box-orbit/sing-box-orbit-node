@@ -1,6 +1,6 @@
+import type { ErrorHandler } from 'hono';
 import { AppError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
-import type { ErrorHandler } from 'hono';
 
 export const errorHandler: ErrorHandler = (err, c) => {
 	logger.error('Request error', {

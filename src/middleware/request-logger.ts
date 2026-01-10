@@ -1,5 +1,5 @@
-import { logger } from '@/utils/logger';
 import { createMiddleware } from 'hono/factory';
+import { logger } from '@/utils/logger';
 
 export const requestLogger = createMiddleware(async (c, next) => {
 	const start = Date.now();

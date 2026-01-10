@@ -1,7 +1,7 @@
+import { createRouter, Response as FetsResponse, Type } from 'fets';
 import { config } from '@/config';
 import { processService } from '@/services';
 import { AppError } from '@/utils/errors';
-import { Response as FetsResponse, Type, createRouter } from 'fets';
 
 const errorResponseSchema = Type.Object({
 	success: Type.Literal(false),

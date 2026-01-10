@@ -1,8 +1,8 @@
+import { type Subprocess, spawn } from 'bun';
 import { config } from '@/config';
 import type { ServerStatus } from '@/types';
 import { ConfigValidationError, ProcessError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
-import { type Subprocess, spawn } from 'bun';
 
 const MAX_LOG_LINES = 1000;
 

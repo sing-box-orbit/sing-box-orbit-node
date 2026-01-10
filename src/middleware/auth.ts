@@ -1,6 +1,6 @@
+import { createMiddleware } from 'hono/factory';
 import { config } from '@/config';
 import { UnauthorizedError } from '@/utils/errors';
-import { createMiddleware } from 'hono/factory';
 
 export const authMiddleware = createMiddleware(async (c, next) => {
 	if (!config.apiKey) {
