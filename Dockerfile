@@ -48,19 +48,18 @@ COPY --from=builder /app/server ./server
 
 # Environment variables
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3333
 ENV SINGBOX_BIN=/usr/local/bin/sing-box
 ENV SINGBOX_CONFIG_PATH=/etc/sing-box/config.json
 ENV SINGBOX_WORKING_DIR=/etc/sing-box
-ENV CLASH_API_URL=http://127.0.0.1:9090
 ENV LOG_LEVEL=info
 
 # Expose port
-EXPOSE 3000
+EXPOSE 3333
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:3333/health || exit 1
 
 # Run standalone executable
 CMD ["./server"]
