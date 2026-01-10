@@ -1,9 +1,11 @@
 import { app } from './app';
 import { config } from './config';
-import { processService } from './services';
+import { logStorageService, processService } from './services';
 import { AppError, logger } from './utils';
 
 const startServer = async () => {
+	await logStorageService.init();
+
 	try {
 		await processService.start();
 	} catch (error) {
@@ -47,6 +49,7 @@ const shutdown = async (server: ReturnType<typeof Bun.serve>) => {
 
 	try {
 		await processService.stop();
+		await logStorageService.flush();
 		server.stop();
 		clearTimeout(shutdownTimeout);
 		logger.info('Shutdown complete');

@@ -7,6 +7,11 @@ mock.module('@/config', () => ({
 		host: '0.0.0.0',
 		port: 3333,
 		apiKey: '',
+		rateLimit: {
+			enabled: false,
+			maxRequests: 100,
+			windowMs: 60000,
+		},
 		singbox: {
 			binary: '/usr/bin/sing-box',
 			configPath: '/etc/sing-box/config.json',
@@ -17,6 +22,13 @@ mock.module('@/config', () => ({
 			restartWindow: 60000,
 		},
 		logLevel: 'error',
+		logs: {
+			maxLines: 1000,
+			persist: false,
+			fileMaxSize: 10485760,
+			fileMaxFiles: 5,
+			filePath: '/tmp/test-logs/singbox.log',
+		},
 	},
 }));
 

@@ -28,6 +28,10 @@ const env = cleanEnv(process.env, {
 	SINGBOX_MAX_RESTARTS: num({ default: 5, desc: 'Max restarts within window before giving up' }),
 	SINGBOX_RESTART_WINDOW: num({ default: 60000, desc: 'Time window for counting restarts (ms)' }),
 	LOG_LEVEL: logLevel,
+	LOG_MAX_LINES: num({ default: 1000, desc: 'Max log lines to keep in memory' }),
+	LOG_PERSIST: bool({ default: true, desc: 'Persist logs to file' }),
+	LOG_FILE_MAX_SIZE: num({ default: 10485760, desc: 'Max log file size in bytes (default 10MB)' }),
+	LOG_FILE_MAX_FILES: num({ default: 5, desc: 'Max number of rotated log files to keep' }),
 });
 
 export const config = {
@@ -51,6 +55,13 @@ export const config = {
 		restartWindow: env.SINGBOX_RESTART_WINDOW,
 	},
 	logLevel: env.LOG_LEVEL,
+	logs: {
+		maxLines: env.LOG_MAX_LINES,
+		persist: env.LOG_PERSIST,
+		fileMaxSize: env.LOG_FILE_MAX_SIZE,
+		fileMaxFiles: env.LOG_FILE_MAX_FILES,
+		filePath: resolve(process.cwd(), 'data/logs/singbox.log'),
+	},
 } as const;
 
 export type Config = typeof config;

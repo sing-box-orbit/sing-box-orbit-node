@@ -3,14 +3,12 @@ import { config } from '@/config';
 import type { RestartStats, ServerStatus } from '@/types';
 import { ConfigValidationError, ProcessError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
-
-const MAX_LOG_LINES = 1000;
+import { logStorageService } from './log-storage';
 
 class ProcessService {
 	private process: Subprocess | null = null;
 	private startedAt: Date | null = null;
 	private version: string | null = null;
-	private logs: string[] = [];
 	private restartCount = 0;
 	private restartTimestamps: number[] = [];
 	private lastRestartAt: Date | null = null;
@@ -28,7 +26,7 @@ class ProcessService {
 
 		await this.checkConfig(configPath);
 
-		this.logs = [];
+		logStorageService.clear();
 
 		logger.info('Starting sing-box', { configPath });
 
@@ -147,10 +145,7 @@ class ProcessService {
 	}
 
 	getLogs(limit?: number): string[] {
-		if (limit && limit > 0) {
-			return this.logs.slice(-limit);
-		}
-		return [...this.logs];
+		return logStorageService.get(limit);
 	}
 
 	private scheduleRestart(exitCode: number | null): void {
@@ -211,10 +206,7 @@ class ProcessService {
 	}
 
 	private addLog(line: string): void {
-		this.logs.push(line);
-		if (this.logs.length > MAX_LOG_LINES) {
-			this.logs.shift();
-		}
+		logStorageService.add(line);
 	}
 
 	private async checkConfig(configPath: string): Promise<void> {
