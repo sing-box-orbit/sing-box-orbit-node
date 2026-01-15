@@ -108,4 +108,4 @@ jobs:
           image-names: sing-box-orbit-node
           cut-off: 1 day ago UTC
           keep-n-most-recent: 3
-          skip-shas: true
+          tag-selection: tagged
