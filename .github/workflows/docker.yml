@@ -106,6 +106,6 @@ jobs:
           account: sing-box-orbit
           token: ${{ secrets.GITHUB_TOKEN }}
           image-names: sing-box-orbit-node
-          cut-off: 1 day ago UTC
+          cut-off: 1d
           keep-n-most-recent: 3
           tag-selection: tagged
