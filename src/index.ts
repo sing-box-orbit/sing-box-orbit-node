@@ -63,7 +63,6 @@ const shutdown = async (server: ReturnType<typeof Bun.serve>) => {
 	}
 };
 
-// Wrap in async IIFE to avoid top-level await (required for bytecode compilation)
 (async () => {
 	const server = await startServer();
 

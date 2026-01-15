@@ -32,6 +32,10 @@ const env = cleanEnv(process.env, {
 	LOG_PERSIST: bool({ default: true, desc: 'Persist logs to file' }),
 	LOG_FILE_MAX_SIZE: num({ default: 10485760, desc: 'Max log file size in bytes (default 10MB)' }),
 	LOG_FILE_MAX_FILES: num({ default: 5, desc: 'Max number of rotated log files to keep' }),
+	CONFIG_BACKUP_ENABLED: bool({ default: true, desc: 'Enable automatic config backups' }),
+	CONFIG_BACKUP_MAX_COUNT: num({ default: 10, desc: 'Max number of backups to keep' }),
+	CONFIG_BACKUP_DIR: str({ default: './data/backups', desc: 'Directory for config backups' }),
+	CONFIG_AUTO_RELOAD: bool({ default: true, desc: 'Auto-reload sing-box after config changes' }),
 });
 
 export const config = {
@@ -61,6 +65,12 @@ export const config = {
 		fileMaxSize: env.LOG_FILE_MAX_SIZE,
 		fileMaxFiles: env.LOG_FILE_MAX_FILES,
 		filePath: resolve(process.cwd(), 'data/logs/singbox.log'),
+	},
+	configApi: {
+		backupEnabled: env.CONFIG_BACKUP_ENABLED,
+		backupMaxCount: env.CONFIG_BACKUP_MAX_COUNT,
+		backupDir: resolvePath(env.CONFIG_BACKUP_DIR),
+		autoReload: env.CONFIG_AUTO_RELOAD,
 	},
 } as const;
 

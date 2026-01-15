@@ -14,7 +14,6 @@ app.use('*', rateLimiter);
 app.use('*', requestLogger);
 app.use('*', authMiddleware);
 
-// OpenAPI docs available only in development
 if (config.isDev) {
 	app.get(
 		'/docs',
@@ -26,7 +25,6 @@ if (config.isDev) {
 }
 
 app.all('*', async (c) => {
-	// Block OpenAPI docs in production
 	if (config.isProd && (c.req.path === '/openapi.json' || c.req.path === '/docs')) {
 		return c.json(
 			{

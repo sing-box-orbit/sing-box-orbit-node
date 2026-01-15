@@ -1,17 +1,16 @@
-// sing-box configuration types
-// Based on https://sing-box.sagernet.org/configuration/
-
 export interface SingBoxConfig {
 	log?: LogConfig;
 	dns?: DnsConfig;
 	ntp?: NtpConfig;
+	certificate?: CertificateConfig;
+	endpoints?: Endpoint[];
 	inbounds?: Inbound[];
 	outbounds?: Outbound[];
 	route?: RouteConfig;
+	services?: Service[];
 	experimental?: ExperimentalConfig;
 }
 
-// Log configuration
 export interface LogConfig {
 	disabled?: boolean;
 	level?: 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal' | 'panic';
@@ -19,7 +18,6 @@ export interface LogConfig {
 	timestamp?: boolean;
 }
 
-// DNS configuration
 export interface DnsConfig {
 	servers?: DnsServer[];
 	rules?: DnsRule[];
@@ -75,7 +73,6 @@ export interface FakeIPConfig {
 	inet6_range?: string;
 }
 
-// NTP configuration
 export interface NtpConfig {
 	enabled?: boolean;
 	server?: string;
@@ -83,7 +80,6 @@ export interface NtpConfig {
 	interval?: string;
 }
 
-// Inbound types
 export type Inbound =
 	| DirectInbound
 	| HttpInbound
@@ -205,7 +201,6 @@ export interface TProxyInbound extends BaseInbound {
 	network?: 'tcp' | 'udp';
 }
 
-// Outbound types
 export type Outbound =
 	| DirectOutbound
 	| BlockOutbound
@@ -395,7 +390,6 @@ export interface UrlTestOutbound {
 	interrupt_exist_connections?: boolean;
 }
 
-// Route configuration
 export interface RouteConfig {
 	rules?: RouteRule[];
 	rule_set?: RuleSet[];
@@ -445,7 +439,6 @@ export interface RuleSet {
 	update_interval?: string;
 }
 
-// Experimental configuration
 export interface ExperimentalConfig {
 	cache_file?: CacheFileConfig;
 	clash_api?: ClashApiConfig;
@@ -482,7 +475,6 @@ export interface V2RayStatsConfig {
 	users?: string[];
 }
 
-// Supporting types
 export interface HttpUser {
 	username: string;
 	password: string;
@@ -668,4 +660,139 @@ export interface TunHttpProxyConfig {
 	server_port: number;
 	bypass_domain?: string[];
 	match_domain?: string[];
+}
+
+// Endpoints (sing-box 1.11.0+)
+export type Endpoint = WireGuardEndpoint | TailscaleEndpoint;
+
+export interface WireGuardEndpoint {
+	type: 'wireguard';
+	tag: string;
+	system?: boolean;
+	name?: string;
+	mtu?: number;
+	address: string[];
+	private_key: string;
+	listen_port?: number;
+	peers: WireGuardEndpointPeer[];
+	udp_timeout?: string;
+	workers?: number;
+}
+
+export interface WireGuardEndpointPeer {
+	address?: string;
+	port?: number;
+	public_key: string;
+	pre_shared_key?: string;
+	allowed_ips: string[];
+	persistent_keepalive_interval?: number;
+	reserved?: number[];
+}
+
+export interface TailscaleEndpoint {
+	type: 'tailscale';
+	tag: string;
+	state_directory?: string;
+	auth_key?: string;
+	control_url?: string;
+	ephemeral?: boolean;
+	hostname?: string;
+	accept_routes?: boolean;
+	exit_node?: string;
+	exit_node_allow_lan_access?: boolean;
+	advertise_routes?: string[];
+	advertise_exit_node?: boolean;
+	relay_server_port?: number;
+	relay_server_static_endpoints?: string[];
+	system_interface?: boolean;
+	system_interface_name?: string;
+	system_interface_mtu?: number;
+	udp_timeout?: string;
+}
+
+// Services (sing-box 1.12.0+)
+export type Service = CcmService | DerpService | OcmService | ResolvedService | SsmApiService;
+
+// Base interface for listen fields shared by services
+interface BaseService {
+	tag: string;
+	listen?: string;
+	listen_port?: number;
+}
+
+// CCM - Claude Code Multiplexer
+export interface CcmService extends BaseService {
+	type: 'ccm';
+	credential_path?: string;
+	usages_path?: string;
+	users?: ServiceUser[];
+	headers?: Record<string, string>;
+	detour?: string;
+	tls?: InboundTlsConfig;
+}
+
+// DERP - Tailscale DERP relay server
+export interface DerpService extends BaseService {
+	type: 'derp';
+	config_path?: string;
+	tls?: InboundTlsConfig;
+	verify_client_endpoint?: string[];
+	verify_client_url?: string[];
+	home?: string;
+	mesh_with?: string[];
+	mesh_psk?: string;
+	mesh_psk_file?: string;
+	stun?: DerpStunConfig;
+}
+
+export interface DerpStunConfig {
+	listen?: string;
+	listen_port?: number;
+}
+
+// OCM - OpenAI Codex Multiplexer
+export interface OcmService extends BaseService {
+	type: 'ocm';
+	credential_path?: string;
+	usages_path?: string;
+	users?: ServiceUser[];
+	headers?: Record<string, string>;
+	detour?: string;
+	tls?: InboundTlsConfig;
+}
+
+// Resolved - fake systemd-resolved DBUS service
+export interface ResolvedService extends BaseService {
+	type: 'resolved';
+}
+
+// SSM API - Shadowsocks Server Management API
+export interface SsmApiService extends BaseService {
+	type: 'ssm-api';
+	servers?: Record<string, string>;
+	cache_path?: string;
+	tls?: InboundTlsConfig;
+}
+
+// Shared user type for CCM and OCM services
+export interface ServiceUser {
+	name: string;
+	token: string;
+}
+
+// Certificate (sing-box 1.12.0+)
+// Defines the global X509 trusted certificate settings
+export interface CertificateConfig {
+	// Default X509 trusted CA certificate list
+	// 'system' (default): System trusted CA certificates
+	// 'mozilla': Mozilla's CA list (China CAs removed)
+	// 'chrome': Chrome Root Store (China CAs removed)
+	// 'none': Empty list
+	store?: 'system' | 'mozilla' | 'chrome' | 'none';
+	// Certificate line array to trust, in PEM format
+	certificate?: string | string[];
+	// Paths to certificate files to trust, in PEM format (auto-reloaded on change)
+	certificate_path?: string | string[];
+	// Directory paths to search for certificates to trust, in PEM format (auto-reloaded on change)
+	certificate_directory_path?: string | string[];
 }
