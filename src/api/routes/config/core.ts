@@ -1,3 +1,4 @@
+import { Value } from '@sinclair/typebox/value';
 import { Response as FetsResponse } from 'fets';
 import {
 	apiResponseSchema,
@@ -7,9 +8,43 @@ import {
 	messageResponseSchema,
 	validationResultSchema,
 } from '@/api/schemas';
+import { knownTopLevelFields, singBoxConfigSchema } from '@/api/schemas/singbox-config';
 import { handleError } from '@/api/utils';
 import { configService } from '@/services';
+import { BadRequestError } from '@/utils/errors';
 import type { RouterType } from '../types';
+
+function validateSingBoxConfig(body: unknown): void {
+	if (typeof body !== 'object' || body === null) {
+		throw new BadRequestError('Configuration must be an object');
+	}
+
+	const unknownFields = Object.keys(body).filter(
+		(key) => !knownTopLevelFields.includes(key as (typeof knownTopLevelFields)[number]),
+	);
+	if (unknownFields.length > 0) {
+		throw new BadRequestError(`Unknown top-level fields: ${unknownFields.join(', ')}`);
+	}
+
+	const errors = [...Value.Errors(singBoxConfigSchema, body)];
+	if (errors.length > 0) {
+		const errorMessages = errors.slice(0, 5).map((e) => `${e.path}: ${e.message}`);
+		throw new BadRequestError(`Schema validation failed: ${errorMessages.join('; ')}`);
+	}
+}
+
+function validatePatchConfig(body: unknown): void {
+	if (typeof body !== 'object' || body === null) {
+		throw new BadRequestError('Patch must be an object');
+	}
+
+	const unknownFields = Object.keys(body).filter(
+		(key) => !knownTopLevelFields.includes(key as (typeof knownTopLevelFields)[number]),
+	);
+	if (unknownFields.length > 0) {
+		throw new BadRequestError(`Unknown top-level fields: ${unknownFields.join(', ')}`);
+	}
+}
 
 export function registerConfigCoreRoutes(router: RouterType) {
 	return router
@@ -61,6 +96,7 @@ export function registerConfigCoreRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = await request.json();
+					validateSingBoxConfig(body);
 					await configService.setConfig(body);
 					return FetsResponse.json({
 						success: true,
@@ -91,6 +127,7 @@ export function registerConfigCoreRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const patch = await request.json();
+					validatePatchConfig(patch);
 					const updatedConfig = await configService.patchConfig(patch);
 					return FetsResponse.json({
 						success: true,

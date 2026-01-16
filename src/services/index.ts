@@ -1,6 +1,18 @@
 export { backupService } from './backup';
 export { configService } from './config';
 export {
+	BaseConfigService,
+	DnsConfigService,
+	dnsConfigService,
+	InboundConfigService,
+	inboundConfigService,
+	OutboundConfigService,
+	outboundConfigService,
+	RouteConfigService,
+	routeConfigService,
+	type ValidationResult,
+} from './config/index';
+export {
 	type CrudContext,
 	createIndexedCrud,
 	createNestedTaggedCrud,

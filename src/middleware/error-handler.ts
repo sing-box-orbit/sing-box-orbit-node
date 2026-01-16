@@ -1,14 +1,20 @@
 import type { ErrorHandler } from 'hono';
+import { config } from '@/config';
 import { AppError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 
 export const errorHandler: ErrorHandler = (err, c) => {
-	logger.error('Request error', {
+	const logData: Record<string, unknown> = {
 		message: err.message,
-		stack: err.stack,
 		path: c.req.path,
 		method: c.req.method,
-	});
+	};
+
+	if (config.isDev) {
+		logData.stack = err.stack;
+	}
+
+	logger.error('Request error', logData);
 
 	if (err instanceof AppError) {
 		return c.json(

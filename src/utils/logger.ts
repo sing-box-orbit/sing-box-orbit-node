@@ -10,10 +10,10 @@ const levels: Record<LogLevel, number> = {
 };
 
 const colors = {
-	debug: '\x1b[36m', // cyan
-	info: '\x1b[32m', // green
-	warn: '\x1b[33m', // yellow
-	error: '\x1b[31m', // red
+	debug: '\x1b[36m',
+	info: '\x1b[32m',
+	warn: '\x1b[33m',
+	error: '\x1b[31m',
 	reset: '\x1b[0m',
 };
 
@@ -25,7 +25,7 @@ function formatTimestamp(): string {
 	return new Date().toISOString();
 }
 
-function formatMessage(level: LogLevel, message: string, meta?: object): string {
+function formatTextMessage(level: LogLevel, message: string, meta?: object): string {
 	const timestamp = formatTimestamp();
 	const color = colors[level];
 	const reset = colors.reset;
@@ -38,6 +38,22 @@ function formatMessage(level: LogLevel, message: string, meta?: object): string 
 	}
 
 	return output;
+}
+
+function formatJsonMessage(level: LogLevel, message: string, meta?: object): string {
+	return JSON.stringify({
+		timestamp: formatTimestamp(),
+		level,
+		message,
+		...meta,
+	});
+}
+
+function formatMessage(level: LogLevel, message: string, meta?: object): string {
+	if (config.logFormat === 'json') {
+		return formatJsonMessage(level, message, meta);
+	}
+	return formatTextMessage(level, message, meta);
 }
 
 export const logger = {

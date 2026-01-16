@@ -21,6 +21,7 @@ import type {
 } from '@/types/singbox-config';
 import { BadRequestError, ConfigValidationError, NotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
+import { RWLock } from '@/utils/rwlock';
 import { type Backup, backupService } from './backup';
 import { processService } from './process';
 
@@ -45,22 +46,35 @@ export interface ConfigChange {
 class ConfigService {
 	private readonly configPath = config.singbox.configPath;
 	private readonly binary = config.singbox.binary;
-	private locked = false;
-	private lockQueue: Array<() => void> = [];
+	private readonly rwlock = new RWLock();
+	private configCache: SingBoxConfig | null = null;
 
 	async getConfig(): Promise<SingBoxConfig> {
-		const file = Bun.file(this.configPath);
-
-		if (!(await file.exists())) {
-			throw new NotFoundError('Configuration file not found');
-		}
+		const release = await this.acquireReadLock();
 
 		try {
-			return (await file.json()) as SingBoxConfig;
+			if (this.configCache) {
+				return this.configCache;
+			}
+
+			const file = Bun.file(this.configPath);
+
+			if (!(await file.exists())) {
+				throw new NotFoundError('Configuration file not found');
+			}
+
+			const configData = (await file.json()) as SingBoxConfig;
+			this.configCache = configData;
+			return configData;
 		} catch (error) {
+			if (error instanceof NotFoundError) {
+				throw error;
+			}
 			throw new BadRequestError(
 				`Failed to parse configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
 			);
+		} finally {
+			release();
 		}
 	}
 
@@ -2471,7 +2485,11 @@ class ConfigService {
 		try {
 			const versionInfo = await this.getSingboxVersion();
 			singboxVersion = versionInfo.version;
-		} catch {}
+		} catch (error) {
+			logger.debug('Failed to get sing-box version for export', {
+				error: error instanceof Error ? error.message : String(error),
+			});
+		}
 
 		const metadata = {
 			exportedAt: new Date().toISOString(),
@@ -2531,7 +2549,11 @@ class ConfigService {
 						`Configuration was exported from sing-box ${importData.metadata.singboxVersion}, current version is ${currentVersion.version}`,
 					);
 				}
-			} catch {}
+			} catch (error) {
+				logger.debug('Failed to compare sing-box versions during import', {
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
 		}
 
 		let finalConfig: SingBoxConfig;
@@ -2714,7 +2736,7 @@ class ConfigService {
 	}
 
 	private async validateWithSingbox(configToValidate: SingBoxConfig): Promise<ValidationResult> {
-		const tempPath = join(dirname(this.configPath), `.config-validate-${Date.now()}.json`);
+		const tempPath = join(dirname(this.configPath), `.config-validate-${crypto.randomUUID()}.json`);
 
 		try {
 			await writeFile(tempPath, JSON.stringify(configToValidate, null, 2));
@@ -2752,16 +2774,22 @@ class ConfigService {
 				if (await file.exists()) {
 					await import('node:fs/promises').then((fs) => fs.rm(tempPath, { force: true }));
 				}
-			} catch {}
+			} catch (error) {
+				logger.debug('Failed to cleanup temp validation file', {
+					tempPath,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
 		}
 	}
 
 	private async atomicWrite(configToWrite: SingBoxConfig): Promise<void> {
-		const tempPath = `${this.configPath}.tmp`;
+		const tempPath = `${this.configPath}.${crypto.randomUUID()}.tmp`;
 		const content = JSON.stringify(configToWrite, null, 2);
 
 		await writeFile(tempPath, content);
 		await rename(tempPath, this.configPath);
+		this.configCache = configToWrite;
 	}
 
 	private async reloadIfRunning(): Promise<void> {
@@ -2837,20 +2865,16 @@ class ConfigService {
 		return result;
 	}
 
-	private async acquireLock(): Promise<() => void> {
-		if (this.locked) {
-			await new Promise<void>((resolve) => this.lockQueue.push(resolve));
-		}
-		this.locked = true;
+	invalidateCache(): void {
+		this.configCache = null;
+	}
 
-		return () => {
-			const next = this.lockQueue.shift();
-			if (next) {
-				next();
-			} else {
-				this.locked = false;
-			}
-		};
+	private async acquireLock(): Promise<() => void> {
+		return this.rwlock.acquireWrite();
+	}
+
+	private async acquireReadLock(): Promise<() => void> {
+		return this.rwlock.acquireRead();
 	}
 }
 

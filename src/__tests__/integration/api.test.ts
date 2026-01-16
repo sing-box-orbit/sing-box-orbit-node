@@ -7,6 +7,7 @@ mock.module('@/config', () => ({
 		host: '0.0.0.0',
 		port: 3333,
 		apiKey: '',
+		corsOrigins: '*',
 		rateLimit: {
 			enabled: false,
 			maxRequests: 100,
@@ -464,6 +465,10 @@ mock.module('@/services', () => ({
 		add: mock(() => {}),
 		clear: mock(() => {}),
 	},
+	inboundConfigService: mockConfigService,
+	outboundConfigService: mockConfigService,
+	routeConfigService: mockConfigService,
+	dnsConfigService: mockConfigService,
 }));
 
 const { app } = await import('@/app');

@@ -7,7 +7,7 @@ import {
 	messageResponseSchema,
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
-import { configService } from '@/services';
+import { routeConfigService } from '@/services';
 import type { RuleSet } from '@/types/singbox-config';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
@@ -36,7 +36,7 @@ export function registerRuleSetRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const ruleSets = await configService.getRuleSets();
+					const ruleSets = await routeConfigService.getRuleSets();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -71,7 +71,7 @@ export function registerRuleSetRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const ruleSet = await configService.getRuleSet(tag);
+					const ruleSet = await routeConfigService.getRuleSet(tag);
 					if (!ruleSet) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Rule set '${tag}' not found`, code: 'NOT_FOUND' },
@@ -114,7 +114,7 @@ export function registerRuleSetRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as RuleSet;
-					const ruleSet = await configService.createRuleSet(body);
+					const ruleSet = await routeConfigService.createRuleSet(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -159,7 +159,7 @@ export function registerRuleSetRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = (await request.json()) as RuleSet;
-					const ruleSet = await configService.updateRuleSet(tag, body);
+					const ruleSet = await routeConfigService.updateRuleSet(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: ruleSet,
@@ -197,7 +197,7 @@ export function registerRuleSetRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const deleted = await configService.deleteRuleSet(tag);
+					const deleted = await routeConfigService.deleteRuleSet(tag);
 					if (!deleted) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Rule set '${tag}' not found`, code: 'NOT_FOUND' },

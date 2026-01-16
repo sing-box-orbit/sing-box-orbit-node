@@ -65,7 +65,12 @@ class BackupService {
 			try {
 				const content = await Bun.file(join(this.backupDir, metaFile)).json();
 				backups.push(content as Backup);
-			} catch {}
+			} catch (error) {
+				logger.debug('Failed to read backup metadata', {
+					file: metaFile,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
 		}
 
 		return backups.sort(

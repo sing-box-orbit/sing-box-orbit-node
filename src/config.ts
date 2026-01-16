@@ -9,11 +9,22 @@ const logLevel = str({
 	desc: 'Logging level',
 });
 
+const logFormat = str({
+	choices: ['text', 'json'] as const,
+	default: 'text',
+	desc: 'Log output format',
+});
+
 const env = cleanEnv(process.env, {
 	NODE_ENV: str({ choices: ['development', 'production', 'test'], default: 'development' }),
 	HOST: str({ default: '0.0.0.0', desc: 'Server host' }),
 	PORT: num({ default: 3333, desc: 'Server port' }),
 	API_KEY: str({ default: '', desc: 'API key for authentication' }),
+	API_KEY_REQUIRED: bool({
+		default: true,
+		desc: 'Require API key in production (exit if missing)',
+	}),
+	CORS_ORIGINS: str({ default: '*', desc: 'Allowed CORS origins (comma-separated, * for all)' }),
 	RATE_LIMIT_ENABLED: bool({ default: true, desc: 'Enable rate limiting' }),
 	RATE_LIMIT_MAX_REQUESTS: num({ default: 100, desc: 'Max requests per window' }),
 	RATE_LIMIT_WINDOW_MS: num({ default: 60000, desc: 'Time window in milliseconds' }),
@@ -28,6 +39,7 @@ const env = cleanEnv(process.env, {
 	SINGBOX_MAX_RESTARTS: num({ default: 5, desc: 'Max restarts within window before giving up' }),
 	SINGBOX_RESTART_WINDOW: num({ default: 60000, desc: 'Time window for counting restarts (ms)' }),
 	LOG_LEVEL: logLevel,
+	LOG_FORMAT: logFormat,
 	LOG_MAX_LINES: num({ default: 1000, desc: 'Max log lines to keep in memory' }),
 	LOG_PERSIST: bool({ default: true, desc: 'Persist logs to file' }),
 	LOG_FILE_MAX_SIZE: num({ default: 10485760, desc: 'Max log file size in bytes (default 10MB)' }),
@@ -38,12 +50,23 @@ const env = cleanEnv(process.env, {
 	CONFIG_AUTO_RELOAD: bool({ default: true, desc: 'Auto-reload sing-box after config changes' }),
 });
 
+const parseCorsOrigins = (origins: string): string | string[] => {
+	if (origins === '*') return '*';
+	return origins
+		.split(',')
+		.map((o) => o.trim())
+		.filter(Boolean);
+};
+
 export const config = {
 	isDev: env.NODE_ENV === 'development',
 	isProd: env.NODE_ENV === 'production',
+	isTest: env.NODE_ENV === 'test',
 	host: env.HOST,
 	port: env.PORT,
 	apiKey: env.API_KEY,
+	apiKeyRequired: env.API_KEY_REQUIRED,
+	corsOrigins: parseCorsOrigins(env.CORS_ORIGINS),
 	rateLimit: {
 		enabled: env.RATE_LIMIT_ENABLED,
 		maxRequests: env.RATE_LIMIT_MAX_REQUESTS,
@@ -59,6 +82,7 @@ export const config = {
 		restartWindow: env.SINGBOX_RESTART_WINDOW,
 	},
 	logLevel: env.LOG_LEVEL,
+	logFormat: env.LOG_FORMAT,
 	logs: {
 		maxLines: env.LOG_MAX_LINES,
 		persist: env.LOG_PERSIST,

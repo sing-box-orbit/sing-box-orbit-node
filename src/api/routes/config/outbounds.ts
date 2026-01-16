@@ -7,7 +7,7 @@ import {
 	messageResponseSchema,
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
-import { configService } from '@/services';
+import { configService, outboundConfigService } from '@/services';
 import type { Outbound } from '@/types/singbox-config';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
@@ -36,7 +36,7 @@ export function registerOutboundRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const outbounds = await configService.getOutbounds();
+					const outbounds = await outboundConfigService.getOutbounds();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -71,7 +71,7 @@ export function registerOutboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const outbound = await configService.getOutbound(tag);
+					const outbound = await outboundConfigService.getOutbound(tag);
 					if (!outbound) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Outbound '${tag}' not found`, code: 'NOT_FOUND' },
@@ -113,7 +113,7 @@ export function registerOutboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as Outbound;
-					const outbound = await configService.createOutbound(body);
+					const outbound = await outboundConfigService.createOutbound(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -157,7 +157,7 @@ export function registerOutboundRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = (await request.json()) as Outbound;
-					const outbound = await configService.updateOutbound(tag, body);
+					const outbound = await outboundConfigService.updateOutbound(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: outbound,
@@ -198,7 +198,7 @@ export function registerOutboundRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = await request.json();
-					const outbound = await configService.patchOutbound(tag, body);
+					const outbound = await outboundConfigService.patchOutbound(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: outbound,
@@ -236,7 +236,7 @@ export function registerOutboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const deleted = await configService.deleteOutbound(tag);
+					const deleted = await outboundConfigService.deleteOutbound(tag);
 					if (!deleted) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Outbound '${tag}' not found`, code: 'NOT_FOUND' },
@@ -292,7 +292,9 @@ export function registerOutboundRoutes(router: RouterType) {
 						const body = await request.json();
 						testUrl = body?.url;
 						timeout = body?.timeout;
-					} catch {}
+					} catch {
+						// Body is optional, defaults are used
+					}
 					const result = await configService.testOutbound(tag, testUrl, timeout);
 					return FetsResponse.json({
 						success: true,

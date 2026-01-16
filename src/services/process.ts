@@ -271,7 +271,11 @@ class ProcessService {
 					}
 				}
 			}
-		} catch {}
+		} catch (error) {
+			logger.debug(`Stream ${type} closed`, {
+				error: error instanceof Error ? error.message : String(error),
+			});
+		}
 	}
 }
 

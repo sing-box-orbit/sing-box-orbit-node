@@ -44,36 +44,28 @@ const baseRouter = createRouter({
 	},
 });
 
-export const fetsRouter = registerExportImportRoutes(
-	registerCertificateRoutes(
-		registerServiceRoutes(
-			registerEndpointRoutes(
-				registerExperimentalRoutes(
-					registerNtpRoutes(
-						registerLogRoutes(
-							registerDnsRoutes(
-								registerRuleSetRoutes(
-									registerRouteRoutes(
-										registerOutboundRoutes(
-											registerInboundRoutes(
-												registerBackupRoutes(
-													registerConfigCoreRoutes(
-														registerDiffRoutes(
-															registerSingboxRoutes(
-																registerServerRoutes(registerHealthRoutes(baseRouter)),
-															),
-														),
-													),
-												),
-											),
-										),
-									),
-								),
-							),
-						),
-					),
-				),
-			),
-		),
-	),
+const routeRegistrars = [
+	registerHealthRoutes,
+	registerServerRoutes,
+	registerSingboxRoutes,
+	registerDiffRoutes,
+	registerConfigCoreRoutes,
+	registerBackupRoutes,
+	registerInboundRoutes,
+	registerOutboundRoutes,
+	registerRouteRoutes,
+	registerRuleSetRoutes,
+	registerDnsRoutes,
+	registerLogRoutes,
+	registerNtpRoutes,
+	registerExperimentalRoutes,
+	registerEndpointRoutes,
+	registerServiceRoutes,
+	registerCertificateRoutes,
+	registerExportImportRoutes,
+];
+
+export const fetsRouter = routeRegistrars.reduce(
+	(router, register) => register(router),
+	baseRouter as ReturnType<typeof createRouter>,
 );

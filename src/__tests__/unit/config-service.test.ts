@@ -37,11 +37,13 @@ describe('ConfigService', () => {
 
 	beforeEach(async () => {
 		consoleLogSpy = spyOn(console, 'log').mockImplementation(() => {});
+		configService.invalidateCache();
 		await mkdir(dirname(TEST_CONFIG_PATH), { recursive: true });
 	});
 
 	afterEach(async () => {
 		consoleLogSpy.mockRestore();
+		configService.invalidateCache();
 		await rm(dirname(TEST_CONFIG_PATH), { recursive: true, force: true });
 	});
 
@@ -124,11 +126,13 @@ describe('ValidationResult type', () => {
 
 	beforeEach(async () => {
 		consoleLogSpy = spyOn(console, 'log').mockImplementation(() => {});
+		configService.invalidateCache();
 		await mkdir(dirname(TEST_CONFIG_PATH), { recursive: true });
 	});
 
 	afterEach(async () => {
 		consoleLogSpy.mockRestore();
+		configService.invalidateCache();
 		await rm(dirname(TEST_CONFIG_PATH), { recursive: true, force: true });
 	});
 

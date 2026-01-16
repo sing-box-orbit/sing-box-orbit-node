@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, statSync, unlinkSync } from 'node:fs';
-import { appendFile, readFile, rename, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, rename, rm, stat } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';
@@ -61,7 +60,9 @@ class LogStorageService {
 
 		try {
 			await this.rotateIfNeeded();
-			await appendFile(config.logs.filePath, content);
+			const file = Bun.file(config.logs.filePath);
+			const existing = (await file.exists()) ? await file.text() : '';
+			await Bun.write(config.logs.filePath, existing + content);
 		} catch (error) {
 			logger.error('Failed to write logs to file', {
 				error: error instanceof Error ? error.message : String(error),
@@ -81,17 +82,20 @@ class LogStorageService {
 
 	private async ensureLogDir(): Promise<void> {
 		const dir = dirname(config.logs.filePath);
-		if (!existsSync(dir)) {
-			mkdirSync(dir, { recursive: true });
+		try {
+			await stat(dir);
+		} catch {
+			await mkdir(dir, { recursive: true });
 			logger.debug('Created log directory', { dir });
 		}
 	}
 
 	private async loadExistingLogs(): Promise<void> {
 		try {
-			if (!existsSync(config.logs.filePath)) return;
+			const file = Bun.file(config.logs.filePath);
+			if (!(await file.exists())) return;
 
-			const content = await readFile(config.logs.filePath, 'utf-8');
+			const content = await file.text();
 			const lines = content.trim().split('\n').filter(Boolean);
 
 			const startIndex = Math.max(0, lines.length - config.logs.maxLines);
@@ -107,18 +111,19 @@ class LogStorageService {
 
 	private async rotateIfNeeded(): Promise<void> {
 		try {
-			if (!existsSync(config.logs.filePath)) return;
+			const file = Bun.file(config.logs.filePath);
+			if (!(await file.exists())) return;
 
-			const stats = statSync(config.logs.filePath);
-			if (stats.size < config.logs.fileMaxSize) return;
+			const fileSize = file.size;
+			if (fileSize < config.logs.fileMaxSize) return;
 
 			const rotatedPath = `${config.logs.filePath}.1`;
 			await rename(config.logs.filePath, rotatedPath);
-			await writeFile(config.logs.filePath, '');
+			await Bun.write(config.logs.filePath, '');
 
 			await this.cleanupOldFiles();
 
-			logger.info('Log file rotated', { size: stats.size });
+			logger.info('Log file rotated', { size: fileSize });
 		} catch (error) {
 			logger.error('Failed to rotate log file', {
 				error: error instanceof Error ? error.message : String(error),
@@ -130,18 +135,26 @@ class LogStorageService {
 		const dir = dirname(config.logs.filePath);
 		const baseName = config.logs.filePath.split('/').pop()!;
 
-		const rotatedFiles = readdirSync(dir)
-			.filter((f) => f.startsWith(baseName) && f !== baseName)
-			.map((f) => ({
-				name: f,
-				path: `${dir}/${f}`,
-				mtime: statSync(`${dir}/${f}`).mtime.getTime(),
-			}))
-			.sort((a, b) => b.mtime - a.mtime);
+		const files = await readdir(dir);
+		const rotatedFiles: { name: string; path: string; mtime: number }[] = [];
+
+		for (const f of files) {
+			if (f.startsWith(baseName) && f !== baseName) {
+				const filePath = `${dir}/${f}`;
+				const fileStat = await stat(filePath);
+				rotatedFiles.push({
+					name: f,
+					path: filePath,
+					mtime: fileStat.mtime.getTime(),
+				});
+			}
+		}
+
+		rotatedFiles.sort((a, b) => b.mtime - a.mtime);
 
 		const filesToDelete = rotatedFiles.slice(config.logs.fileMaxFiles - 1);
 		for (const file of filesToDelete) {
-			unlinkSync(file.path);
+			await rm(file.path);
 			logger.debug('Deleted old log file', { file: file.name });
 		}
 	}

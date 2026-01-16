@@ -7,7 +7,7 @@ import {
 	messageResponseSchema,
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
-import { configService } from '@/services';
+import { routeConfigService } from '@/services';
 import type { RouteConfig, RouteRule } from '@/types/singbox-config';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
@@ -31,7 +31,7 @@ export function registerRouteRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const route = await configService.getRoute();
+					const route = await routeConfigService.getRoute();
 					return FetsResponse.json({
 						success: true,
 						data: route,
@@ -61,7 +61,7 @@ export function registerRouteRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as RouteConfig;
-					const route = await configService.setRoute(body);
+					const route = await routeConfigService.setRoute(body);
 					return FetsResponse.json({
 						success: true,
 						data: route,
@@ -91,7 +91,7 @@ export function registerRouteRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as Partial<RouteConfig>;
-					const route = await configService.patchRoute(body);
+					const route = await routeConfigService.patchRoute(body);
 					return FetsResponse.json({
 						success: true,
 						data: route,
@@ -123,7 +123,7 @@ export function registerRouteRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const rules = await configService.getRouteRules();
+					const rules = await routeConfigService.getRouteRules();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -165,7 +165,7 @@ export function registerRouteRoutes(router: RouterType) {
 							{ status: 400 },
 						);
 					}
-					const rule = await configService.getRouteRule(index);
+					const rule = await routeConfigService.getRouteRule(index);
 					if (!rule) {
 						return FetsResponse.json(
 							{
@@ -215,7 +215,7 @@ export function registerRouteRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as RouteRule;
-					const result = await configService.createRouteRule(body);
+					const result = await routeConfigService.createRouteRule(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -264,7 +264,7 @@ export function registerRouteRoutes(router: RouterType) {
 						);
 					}
 					const body = (await request.json()) as RouteRule;
-					const rule = await configService.updateRouteRule(index, body);
+					const rule = await routeConfigService.updateRouteRule(index, body);
 					return FetsResponse.json({
 						success: true,
 						data: rule,
@@ -309,7 +309,7 @@ export function registerRouteRoutes(router: RouterType) {
 							{ status: 400 },
 						);
 					}
-					const deleted = await configService.deleteRouteRule(index);
+					const deleted = await routeConfigService.deleteRouteRule(index);
 					if (!deleted) {
 						return FetsResponse.json(
 							{
@@ -357,7 +357,7 @@ export function registerRouteRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { fromIndex, toIndex } = await request.json();
-					const rules = await configService.reorderRouteRules(fromIndex, toIndex);
+					const rules = await routeConfigService.reorderRouteRules(fromIndex, toIndex);
 					return FetsResponse.json({
 						success: true,
 						data: {

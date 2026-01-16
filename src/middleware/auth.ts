@@ -4,12 +4,12 @@ import { config } from '@/config';
 import { UnauthorizedError } from '@/utils/errors';
 
 function timingSafeCompare(a: string, b: string): boolean {
-	if (a.length !== b.length) {
-		return false;
-	}
-	const bufA = Buffer.from(a);
-	const bufB = Buffer.from(b);
-	return timingSafeEqual(bufA, bufB);
+	const maxLen = Math.max(a.length, b.length);
+	const bufA = Buffer.alloc(maxLen);
+	const bufB = Buffer.alloc(maxLen);
+	bufA.write(a);
+	bufB.write(b);
+	return a.length === b.length && timingSafeEqual(bufA, bufB);
 }
 
 export const authMiddleware = createMiddleware(async (c, next) => {

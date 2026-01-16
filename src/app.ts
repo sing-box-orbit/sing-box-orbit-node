@@ -9,13 +9,21 @@ import {
 	rateLimiter,
 	requestLogger,
 	sanitizeMiddleware,
+	securityHeaders,
 } from './middleware';
 
 const app = new Hono();
 
 app.onError(errorHandler);
 
-app.use('*', cors());
+app.use(
+	'*',
+	cors({
+		origin: config.corsOrigins,
+		credentials: true,
+	}),
+);
+app.use('*', securityHeaders);
 app.use('*', sanitizeMiddleware);
 app.use('*', rateLimiter);
 app.use('*', requestLogger);

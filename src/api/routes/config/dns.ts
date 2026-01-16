@@ -7,7 +7,7 @@ import {
 	messageResponseSchema,
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
-import { configService } from '@/services';
+import { dnsConfigService } from '@/services';
 import type { DnsConfig, DnsRule, DnsServer } from '@/types/singbox-config';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
@@ -31,7 +31,7 @@ export function registerDnsRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const dns = await configService.getDns();
+					const dns = await dnsConfigService.getDns();
 					return FetsResponse.json({
 						success: true,
 						data: dns,
@@ -61,7 +61,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as DnsConfig;
-					const dns = await configService.setDns(body);
+					const dns = await dnsConfigService.setDns(body);
 					return FetsResponse.json({
 						success: true,
 						data: dns,
@@ -91,7 +91,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as Partial<DnsConfig>;
-					const dns = await configService.patchDns(body);
+					const dns = await dnsConfigService.patchDns(body);
 					return FetsResponse.json({
 						success: true,
 						data: dns,
@@ -123,7 +123,7 @@ export function registerDnsRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const servers = await configService.getDnsServers();
+					const servers = await dnsConfigService.getDnsServers();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -158,7 +158,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const server = await configService.getDnsServer(tag);
+					const server = await dnsConfigService.getDnsServer(tag);
 					if (!server) {
 						return FetsResponse.json(
 							{
@@ -204,7 +204,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as DnsServer;
-					const server = await configService.createDnsServer(body);
+					const server = await dnsConfigService.createDnsServer(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -248,7 +248,7 @@ export function registerDnsRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = (await request.json()) as DnsServer;
-					const server = await configService.updateDnsServer(tag, body);
+					const server = await dnsConfigService.updateDnsServer(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: server,
@@ -286,7 +286,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const deleted = await configService.deleteDnsServer(tag);
+					const deleted = await dnsConfigService.deleteDnsServer(tag);
 					if (!deleted) {
 						return FetsResponse.json(
 							{
@@ -328,7 +328,7 @@ export function registerDnsRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const rules = await configService.getDnsRules();
+					const rules = await dnsConfigService.getDnsRules();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -370,7 +370,7 @@ export function registerDnsRoutes(router: RouterType) {
 							{ status: 400 },
 						);
 					}
-					const rule = await configService.getDnsRule(index);
+					const rule = await dnsConfigService.getDnsRule(index);
 					if (!rule) {
 						return FetsResponse.json(
 							{
@@ -420,7 +420,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as DnsRule;
-					const result = await configService.createDnsRule(body);
+					const result = await dnsConfigService.createDnsRule(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -469,7 +469,7 @@ export function registerDnsRoutes(router: RouterType) {
 						);
 					}
 					const body = (await request.json()) as DnsRule;
-					const rule = await configService.updateDnsRule(index, body);
+					const rule = await dnsConfigService.updateDnsRule(index, body);
 					return FetsResponse.json({
 						success: true,
 						data: rule,
@@ -514,7 +514,7 @@ export function registerDnsRoutes(router: RouterType) {
 							{ status: 400 },
 						);
 					}
-					const deleted = await configService.deleteDnsRule(index);
+					const deleted = await dnsConfigService.deleteDnsRule(index);
 					if (!deleted) {
 						return FetsResponse.json(
 							{
@@ -562,7 +562,7 @@ export function registerDnsRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { fromIndex, toIndex } = await request.json();
-					const rules = await configService.reorderDnsRules(fromIndex, toIndex);
+					const rules = await dnsConfigService.reorderDnsRules(fromIndex, toIndex);
 					return FetsResponse.json({
 						success: true,
 						data: {

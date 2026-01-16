@@ -41,7 +41,9 @@ export function registerBackupRoutes(router: RouterType) {
 						if (body?.reason) {
 							reason = body.reason;
 						}
-					} catch {}
+					} catch {
+						// Body is optional, default reason is used
+					}
 					const backup = await configService.createBackup(reason);
 					return FetsResponse.json({
 						success: true,

@@ -5,6 +5,10 @@ import { AppError, logger } from './utils';
 
 const startServer = async () => {
 	if (config.isProd && !config.apiKey) {
+		if (config.apiKeyRequired) {
+			logger.error('API_KEY is required in production mode. Set API_KEY or API_KEY_REQUIRED=false');
+			process.exit(1);
+		}
 		logger.warn(
 			'WARNING: No API_KEY configured in production! API is accessible without authentication.',
 		);

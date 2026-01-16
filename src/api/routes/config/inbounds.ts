@@ -7,7 +7,7 @@ import {
 	messageResponseSchema,
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
-import { configService } from '@/services';
+import { inboundConfigService } from '@/services';
 import type { Inbound } from '@/types/singbox-config';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
@@ -36,7 +36,7 @@ export function registerInboundRoutes(router: RouterType) {
 			},
 			handler: async () => {
 				try {
-					const inbounds = await configService.getInbounds();
+					const inbounds = await inboundConfigService.getInbounds();
 					return FetsResponse.json({
 						success: true,
 						data: {
@@ -71,7 +71,7 @@ export function registerInboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const inbound = await configService.getInbound(tag);
+					const inbound = await inboundConfigService.getInbound(tag);
 					if (!inbound) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Inbound '${tag}' not found`, code: 'NOT_FOUND' },
@@ -113,7 +113,7 @@ export function registerInboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const body = (await request.json()) as Inbound;
-					const inbound = await configService.createInbound(body);
+					const inbound = await inboundConfigService.createInbound(body);
 					return FetsResponse.json(
 						{
 							success: true,
@@ -157,7 +157,7 @@ export function registerInboundRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = (await request.json()) as Inbound;
-					const inbound = await configService.updateInbound(tag, body);
+					const inbound = await inboundConfigService.updateInbound(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: inbound,
@@ -198,7 +198,7 @@ export function registerInboundRoutes(router: RouterType) {
 				try {
 					const { tag } = request.params;
 					const body = await request.json();
-					const inbound = await configService.patchInbound(tag, body);
+					const inbound = await inboundConfigService.patchInbound(tag, body);
 					return FetsResponse.json({
 						success: true,
 						data: inbound,
@@ -236,7 +236,7 @@ export function registerInboundRoutes(router: RouterType) {
 			handler: async (request) => {
 				try {
 					const { tag } = request.params;
-					const deleted = await configService.deleteInbound(tag);
+					const deleted = await inboundConfigService.deleteInbound(tag);
 					if (!deleted) {
 						return FetsResponse.json(
 							{ success: false as const, error: `Inbound '${tag}' not found`, code: 'NOT_FOUND' },
