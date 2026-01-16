@@ -1056,8 +1056,6 @@ class ConfigService {
 		}
 	}
 
-	// DNS Config methods
-
 	async getDns(): Promise<DnsConfig> {
 		const cfg = await this.getConfig();
 		return cfg.dns || {};
@@ -1139,8 +1137,6 @@ class ConfigService {
 			release();
 		}
 	}
-
-	// DNS Servers methods
 
 	async getDnsServers(): Promise<DnsServer[]> {
 		const dns = await this.getDns();
@@ -1299,8 +1295,6 @@ class ConfigService {
 			release();
 		}
 	}
-
-	// DNS Rules methods
 
 	async getDnsRules(): Promise<DnsRule[]> {
 		const dns = await this.getDns();
@@ -1506,8 +1500,6 @@ class ConfigService {
 		}
 	}
 
-	// Log Config methods
-
 	async getLog(): Promise<LogConfig> {
 		const cfg = await this.getConfig();
 		return cfg.log || {};
@@ -1590,8 +1582,6 @@ class ConfigService {
 		}
 	}
 
-	// NTP Config methods
-
 	async getNtp(): Promise<NtpConfig> {
 		const cfg = await this.getConfig();
 		return cfg.ntp || {};
@@ -1673,8 +1663,6 @@ class ConfigService {
 			release();
 		}
 	}
-
-	// Experimental Config methods
 
 	async getExperimental(): Promise<ExperimentalConfig> {
 		const cfg = await this.getConfig();
@@ -1764,8 +1752,6 @@ class ConfigService {
 		}
 	}
 
-	// Outbound test and latency methods
-
 	async testOutbound(
 		tag: string,
 		testUrl = 'https://www.google.com/generate_204',
@@ -1779,8 +1765,6 @@ class ConfigService {
 		const startTime = Date.now();
 
 		try {
-			// Use sing-box's urltest functionality via API if available
-			// Otherwise fall back to a simple connectivity test
 			const controller = new AbortController();
 			const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -1859,14 +1843,11 @@ class ConfigService {
 			return { latency: null, samples: [], error: lastError || 'All samples failed' };
 		}
 
-		// Calculate average latency
 		const avgLatency = Math.round(latencies.reduce((a, b) => a + b, 0) / latencies.length);
 		logger.info('Outbound latency measured', { tag, avgLatency, sampleCount: latencies.length });
 
 		return { latency: avgLatency, samples: latencies };
 	}
-
-	// Sing-box binary info methods
 
 	async getSingboxVersion(): Promise<{
 		version: string;
@@ -1886,12 +1867,6 @@ class ConfigService {
 		if (exitCode !== 0) {
 			throw new BadRequestError('Failed to get sing-box version');
 		}
-
-		// Parse output like:
-		// sing-box version 1.10.0
-		// Tags: with_gvisor,with_quic,with_dhcp,...
-		// CGO: enabled
-		// Revision: abc123def
 
 		const lines = stdout.trim().split('\n');
 		const versionMatch = lines[0]?.match(/sing-box version (.+)/);
@@ -1946,8 +1921,6 @@ class ConfigService {
 			};
 		}
 	}
-
-	// Endpoints methods (sing-box 1.11.0+)
 
 	async getEndpoints(): Promise<Endpoint[]> {
 		const cfg = await this.getConfig();
@@ -2153,8 +2126,6 @@ class ConfigService {
 		}
 	}
 
-	// Services methods (sing-box 1.12.0+)
-
 	async getServices(): Promise<Service[]> {
 		const cfg = await this.getConfig();
 		return cfg.services || [];
@@ -2359,8 +2330,6 @@ class ConfigService {
 		}
 	}
 
-	// Certificate methods (sing-box 1.12.0+)
-
 	async getCertificate(): Promise<CertificateConfig> {
 		const cfg = await this.getConfig();
 		return cfg.certificate || {};
@@ -2488,8 +2457,6 @@ class ConfigService {
 		}
 	}
 
-	// Export/Import methods
-
 	async exportConfig(): Promise<{
 		config: SingBoxConfig;
 		metadata: {
@@ -2504,9 +2471,7 @@ class ConfigService {
 		try {
 			const versionInfo = await this.getSingboxVersion();
 			singboxVersion = versionInfo.version;
-		} catch {
-			// Ignore version fetch errors
-		}
+		} catch {}
 
 		const metadata = {
 			exportedAt: new Date().toISOString(),
@@ -2552,14 +2517,12 @@ class ConfigService {
 			throw new BadRequestError('Configuration must be an object');
 		}
 
-		// Check metadata version compatibility
 		if (importData.metadata?.version && importData.metadata.version !== '1.0') {
 			warnings.push(
 				`Import format version ${importData.metadata.version} may not be fully compatible`,
 			);
 		}
 
-		// Check sing-box version compatibility
 		if (importData.metadata?.singboxVersion) {
 			try {
 				const currentVersion = await this.getSingboxVersion();
@@ -2568,9 +2531,7 @@ class ConfigService {
 						`Configuration was exported from sing-box ${importData.metadata.singboxVersion}, current version is ${currentVersion.version}`,
 					);
 				}
-			} catch {
-				// Ignore version check errors
-			}
+			} catch {}
 		}
 
 		let finalConfig: SingBoxConfig;
@@ -2582,7 +2543,6 @@ class ConfigService {
 			finalConfig = importData.config;
 		}
 
-		// Validate the configuration
 		if (validate) {
 			const validation = await this.validateConfig(finalConfig);
 			if (!validation.valid) {
@@ -2595,7 +2555,6 @@ class ConfigService {
 		const release = await this.acquireLock();
 
 		try {
-			// Create backup before import
 			if (createBackup && config.configApi.backupEnabled) {
 				const currentContent = await this.getConfigRaw();
 				if (currentContent) {
@@ -2625,8 +2584,6 @@ class ConfigService {
 			release();
 		}
 	}
-
-	// Config diff methods
 
 	async diffWithBackup(backupId: string): Promise<{
 		hasChanges: boolean;

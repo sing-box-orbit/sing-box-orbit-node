@@ -662,7 +662,6 @@ export interface TunHttpProxyConfig {
 	match_domain?: string[];
 }
 
-// Endpoints (sing-box 1.11.0+)
 export type Endpoint = WireGuardEndpoint | TailscaleEndpoint;
 
 export interface WireGuardEndpoint {
@@ -710,17 +709,14 @@ export interface TailscaleEndpoint {
 	udp_timeout?: string;
 }
 
-// Services (sing-box 1.12.0+)
 export type Service = CcmService | DerpService | OcmService | ResolvedService | SsmApiService;
 
-// Base interface for listen fields shared by services
 interface BaseService {
 	tag: string;
 	listen?: string;
 	listen_port?: number;
 }
 
-// CCM - Claude Code Multiplexer
 export interface CcmService extends BaseService {
 	type: 'ccm';
 	credential_path?: string;
@@ -731,7 +727,6 @@ export interface CcmService extends BaseService {
 	tls?: InboundTlsConfig;
 }
 
-// DERP - Tailscale DERP relay server
 export interface DerpService extends BaseService {
 	type: 'derp';
 	config_path?: string;
@@ -750,7 +745,6 @@ export interface DerpStunConfig {
 	listen_port?: number;
 }
 
-// OCM - OpenAI Codex Multiplexer
 export interface OcmService extends BaseService {
 	type: 'ocm';
 	credential_path?: string;
@@ -761,12 +755,10 @@ export interface OcmService extends BaseService {
 	tls?: InboundTlsConfig;
 }
 
-// Resolved - fake systemd-resolved DBUS service
 export interface ResolvedService extends BaseService {
 	type: 'resolved';
 }
 
-// SSM API - Shadowsocks Server Management API
 export interface SsmApiService extends BaseService {
 	type: 'ssm-api';
 	servers?: Record<string, string>;
@@ -774,25 +766,14 @@ export interface SsmApiService extends BaseService {
 	tls?: InboundTlsConfig;
 }
 
-// Shared user type for CCM and OCM services
 export interface ServiceUser {
 	name: string;
 	token: string;
 }
 
-// Certificate (sing-box 1.12.0+)
-// Defines the global X509 trusted certificate settings
 export interface CertificateConfig {
-	// Default X509 trusted CA certificate list
-	// 'system' (default): System trusted CA certificates
-	// 'mozilla': Mozilla's CA list (China CAs removed)
-	// 'chrome': Chrome Root Store (China CAs removed)
-	// 'none': Empty list
 	store?: 'system' | 'mozilla' | 'chrome' | 'none';
-	// Certificate line array to trust, in PEM format
 	certificate?: string | string[];
-	// Paths to certificate files to trust, in PEM format (auto-reloaded on change)
 	certificate_path?: string | string[];
-	// Directory paths to search for certificates to trust, in PEM format (auto-reloaded on change)
 	certificate_directory_path?: string | string[];
 }

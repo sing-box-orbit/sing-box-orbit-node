@@ -1,6 +1,16 @@
+import { timingSafeEqual } from 'node:crypto';
 import { createMiddleware } from 'hono/factory';
 import { config } from '@/config';
 import { UnauthorizedError } from '@/utils/errors';
+
+function timingSafeCompare(a: string, b: string): boolean {
+	if (a.length !== b.length) {
+		return false;
+	}
+	const bufA = Buffer.from(a);
+	const bufB = Buffer.from(b);
+	return timingSafeEqual(bufA, bufB);
+}
 
 export const authMiddleware = createMiddleware(async (c, next) => {
 	if (!config.apiKey) {
@@ -19,7 +29,7 @@ export const authMiddleware = createMiddleware(async (c, next) => {
 		token = apiKeyHeader;
 	}
 
-	if (!token || token !== config.apiKey) {
+	if (!token || !timingSafeCompare(token, config.apiKey)) {
 		throw new UnauthorizedError('Invalid or missing API key');
 	}
 

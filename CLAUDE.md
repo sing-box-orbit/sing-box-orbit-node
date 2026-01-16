@@ -34,7 +34,32 @@ bun run test:integration  # Run integration tests only
 ```
 src/
 ├── api/
-│   └── fets-router.ts    # OpenAPI routes with TypeBox schemas
+│   ├── fets-router.ts    # Router composition entry point
+│   ├── schemas.ts        # Shared TypeBox schemas
+│   ├── utils.ts          # API utilities (handleError)
+│   └── routes/
+│       ├── index.ts      # Re-exports all route modules
+│       ├── types.ts      # RouterType definition
+│       ├── health.ts     # Health check
+│       ├── server.ts     # Server status/reload/logs
+│       ├── singbox.ts    # sing-box binary info
+│       ├── diff.ts       # Config diff endpoints
+│       └── config/       # Config domain routes
+│           ├── index.ts  # Re-exports config routes
+│           ├── core.ts   # GET/PUT/PATCH/validate
+│           ├── backups.ts
+│           ├── inbounds.ts
+│           ├── outbounds.ts
+│           ├── route.ts
+│           ├── rule-sets.ts
+│           ├── dns.ts
+│           ├── log.ts
+│           ├── ntp.ts
+│           ├── experimental.ts
+│           ├── endpoints.ts
+│           ├── services.ts
+│           ├── certificate.ts
+│           └── export-import.ts
 ├── middleware/
 │   ├── auth.ts           # Bearer/API key authentication
 │   ├── rate-limiter.ts   # Request rate limiting
@@ -62,7 +87,9 @@ src/
 ## Architecture
 
 ### API Layer
-- Routes defined in `fets-router.ts` using feTS with TypeBox schemas
+- Routes are modular: each domain has its own file in `src/api/routes/`
+- Each route module exports a `registerXxxRoutes(router)` function
+- `fets-router.ts` composes all routes using nested function calls
 - OpenAPI spec auto-generated from route definitions
 - Hono handles middleware and wraps feTS router
 
@@ -137,6 +164,16 @@ RESTART_WINDOW=60000
 
 ## Code Style
 
+### Imports
+Use `@` alias for all internal imports. Never use relative paths like `../` or `../../`:
+- `@/services` — services
+- `@/types/singbox-config` — types
+- `@/utils/errors` — utilities
+- `@/api/schemas` — API schemas
+- `@/api/utils` — API utilities
+
+Exception: Relative imports within the same directory (e.g., `./types` from `routes/index.ts`) are allowed.
+
 ### No Comments
 Do not add comments to the code:
 - No JSDoc comments (`/** */`)
@@ -145,9 +182,11 @@ Do not add comments to the code:
 - Code should be self-documenting through clear naming
 
 ### Adding New Endpoints
-1. Define TypeBox schemas in `fets-router.ts`
-2. Add route with `.route()` method
-3. Include all possible response statuses in schema
+1. Create or edit route file in `src/api/routes/` (or `src/api/routes/config/` for config-related)
+2. Define TypeBox schemas inline or import from `@/api/schemas`
+3. Export a `registerXxxRoutes(router: RouterType)` function
+4. Register the function in `fets-router.ts` composition chain
+5. Include all possible response statuses in schema
 
 ### Testing
 - Mock services in tests using `mock.module()`

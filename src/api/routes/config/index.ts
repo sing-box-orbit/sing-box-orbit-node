@@ -1,0 +1,14 @@
+export { registerBackupRoutes } from './backups';
+export { registerCertificateRoutes } from './certificate';
+export { registerConfigCoreRoutes } from './core';
+export { registerDnsRoutes } from './dns';
+export { registerEndpointRoutes } from './endpoints';
+export { registerExperimentalRoutes } from './experimental';
+export { registerExportImportRoutes } from './export-import';
+export { registerInboundRoutes } from './inbounds';
+export { registerLogRoutes } from './log';
+export { registerNtpRoutes } from './ntp';
+export { registerOutboundRoutes } from './outbounds';
+export { registerRouteRoutes } from './route';
+export { registerRuleSetRoutes } from './rule-sets';
+export { registerServiceRoutes } from './services';
