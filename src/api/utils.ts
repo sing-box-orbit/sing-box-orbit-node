@@ -14,21 +14,3 @@ export function handleError(error: unknown) {
 		{ status: 500 as const },
 	);
 }
-
-export function notFoundResponse(message: string) {
-	return FetsResponse.json(
-		{ success: false as const, error: message, code: 'NOT_FOUND' },
-		{ status: 404 },
-	);
-}
-
-export function badRequestResponse(message: string) {
-	return FetsResponse.json(
-		{ success: false as const, error: message, code: 'BAD_REQUEST' },
-		{ status: 400 },
-	);
-}
-
-export function successResponse<T>(data: T, status: 200 | 201 = 200) {
-	return FetsResponse.json({ success: true, data }, { status });
-}

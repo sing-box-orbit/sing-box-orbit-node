@@ -4,6 +4,12 @@ import { logStorageService, processService } from './services';
 import { AppError, logger } from './utils';
 
 const startServer = async () => {
+	if (config.isProd && !config.apiKey) {
+		logger.warn(
+			'WARNING: No API_KEY configured in production! API is accessible without authentication.',
+		);
+	}
+
 	await logStorageService.init();
 
 	try {

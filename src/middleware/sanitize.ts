@@ -1,5 +1,4 @@
 import { createMiddleware } from 'hono/factory';
-import { sanitizeObject } from '@/utils/sanitize';
 
 const MAX_BODY_SIZE = 10 * 1024 * 1024;
 
@@ -18,7 +17,3 @@ export const sanitizeMiddleware = createMiddleware(async (c, next) => {
 
 	await next();
 });
-
-export function sanitizeRequestBody<T extends Record<string, unknown>>(body: T): T {
-	return sanitizeObject(body);
-}
