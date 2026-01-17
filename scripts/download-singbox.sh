@@ -5,7 +5,18 @@
 
 set -e
 
-VERSION="${SINGBOX_VERSION:-1.10.0}"
+# Get latest version from GitHub API if not specified
+if [ -z "$SINGBOX_VERSION" ]; then
+    echo "Fetching latest sing-box version..."
+    VERSION=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
+    if [ -z "$VERSION" ]; then
+        echo "Failed to fetch latest version, falling back to 1.10.0"
+        VERSION="1.10.0"
+    fi
+else
+    VERSION="$SINGBOX_VERSION"
+fi
+
 OS=$(uname -s | tr '[:upper:]' '[:lower:]')
 ARCH=$(uname -m)
 
