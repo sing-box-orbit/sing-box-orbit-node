@@ -18,6 +18,7 @@ import {
 	registerServerRoutes,
 	registerServiceRoutes,
 	registerSingboxRoutes,
+	registerStateRoutes,
 } from './routes';
 
 const baseRouter = createRouter({
@@ -48,6 +49,7 @@ const routeRegistrars = [
 	registerHealthRoutes,
 	registerServerRoutes,
 	registerSingboxRoutes,
+	registerStateRoutes,
 	registerDiffRoutes,
 	registerConfigCoreRoutes,
 	registerBackupRoutes,

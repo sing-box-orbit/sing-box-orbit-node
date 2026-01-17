@@ -10,6 +10,6 @@ export {
 	updateItem,
 } from './crud-helpers';
 export { DnsConfigService, dnsConfigService } from './dns';
-export { InboundConfigService, inboundConfigService } from './inbound';
+export { InboundConfigService, type InboundUser, inboundConfigService } from './inbound';
 export { OutboundConfigService, outboundConfigService } from './outbound';
 export { RouteConfigService, routeConfigService } from './route';
