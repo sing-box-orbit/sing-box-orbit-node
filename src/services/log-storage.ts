@@ -82,9 +82,8 @@ class LogStorageService {
 
 	private async ensureLogDir(): Promise<void> {
 		const dir = dirname(config.logs.filePath);
-		try {
-			await stat(dir);
-		} catch {
+		const dirFile = Bun.file(dir);
+		if (!(await dirFile.exists())) {
 			await mkdir(dir, { recursive: true });
 			logger.debug('Created log directory', { dir });
 		}

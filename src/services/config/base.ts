@@ -1,4 +1,4 @@
-import { rename, writeFile } from 'node:fs/promises';
+import { rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { spawn } from 'bun';
 import { config } from '@/config';
@@ -172,7 +172,7 @@ export class BaseConfigService {
 		const tempPath = join(dirname(this.configPath), `.config-validate-${crypto.randomUUID()}.json`);
 
 		try {
-			await writeFile(tempPath, JSON.stringify(configToValidate, null, 2));
+			await Bun.write(tempPath, JSON.stringify(configToValidate, null, 2));
 
 			const proc = spawn({
 				cmd: [this.binary, 'check', '-c', tempPath],
@@ -202,10 +202,9 @@ export class BaseConfigService {
 			return { valid: true, errors: [] };
 		} finally {
 			try {
-				(await Bun.file(tempPath).exists()) && (await Bun.write(tempPath, ''));
 				const file = Bun.file(tempPath);
 				if (await file.exists()) {
-					await import('node:fs/promises').then((fs) => fs.rm(tempPath, { force: true }));
+					await file.unlink();
 				}
 			} catch (error) {
 				logger.debug('Failed to cleanup temp validation file', {
@@ -220,7 +219,7 @@ export class BaseConfigService {
 		const tempPath = `${this.configPath}.${crypto.randomUUID()}.tmp`;
 		const content = JSON.stringify(configToWrite, null, 2);
 
-		await writeFile(tempPath, content);
+		await Bun.write(tempPath, content);
 		await rename(tempPath, this.configPath);
 		this.configCache = configToWrite;
 	}

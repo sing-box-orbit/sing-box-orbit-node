@@ -1,4 +1,4 @@
-import { mkdir, readdir, rm, stat } from 'node:fs/promises';
+import { mkdir, readdir, rm } from 'node:fs/promises';
 import { join } from 'node:path';
 import { config } from '@/config';
 import { logger } from '@/utils/logger';
@@ -36,13 +36,13 @@ class BackupService {
 
 		await Bun.write(filepath, configContent);
 
-		const fileStats = await stat(filepath);
+		const file = Bun.file(filepath);
 		const backup: Backup = {
 			id,
 			createdAt: new Date().toISOString(),
 			reason,
 			configHash,
-			size: fileStats.size,
+			size: file.size,
 			filename,
 		};
 
