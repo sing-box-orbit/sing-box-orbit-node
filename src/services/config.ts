@@ -18,7 +18,7 @@ import type {
 	RuleSet,
 	Service,
 	SingBoxConfig,
-} from '@/types/singbox-config';
+} from '@/types/singbox';
 import { BadRequestError, ConfigValidationError, NotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 import { RWLock } from '@/utils/rwlock';
@@ -758,7 +758,10 @@ class ConfigService {
 			}
 
 			const newIndex = newRules.length - 1;
-			logger.info('Route rule created', { index: newIndex, outbound: rule.outbound });
+			logger.info('Route rule created', {
+				index: newIndex,
+				outbound: 'outbound' in rule ? rule.outbound : undefined,
+			});
 			return { rule, index: newIndex };
 		} finally {
 			release();
@@ -806,7 +809,10 @@ class ConfigService {
 				await this.reloadIfRunning();
 			}
 
-			logger.info('Route rule updated', { index, outbound: rule.outbound });
+			logger.info('Route rule updated', {
+				index,
+				outbound: 'outbound' in rule ? rule.outbound : undefined,
+			});
 			return rule;
 		} finally {
 			release();
@@ -1202,7 +1208,10 @@ class ConfigService {
 				await this.reloadIfRunning();
 			}
 
-			logger.info('DNS server created', { tag: server.tag, address: server.address });
+			logger.info('DNS server created', {
+				tag: server.tag,
+				type: 'type' in server ? server.type : 'legacy',
+			});
 			return server;
 		} finally {
 			release();
@@ -1255,7 +1264,10 @@ class ConfigService {
 				await this.reloadIfRunning();
 			}
 
-			logger.info('DNS server updated', { tag: server.tag, address: server.address });
+			logger.info('DNS server updated', {
+				tag: server.tag,
+				type: 'type' in server ? server.type : 'legacy',
+			});
 			return server;
 		} finally {
 			release();
@@ -1360,7 +1372,10 @@ class ConfigService {
 			}
 
 			const newIndex = newRules.length - 1;
-			logger.info('DNS rule created', { index: newIndex, server: rule.server });
+			logger.info('DNS rule created', {
+				index: newIndex,
+				action: 'action' in rule ? rule.action : 'route',
+			});
 			return { rule, index: newIndex };
 		} finally {
 			release();
@@ -1408,7 +1423,7 @@ class ConfigService {
 				await this.reloadIfRunning();
 			}
 
-			logger.info('DNS rule updated', { index, server: rule.server });
+			logger.info('DNS rule updated', { index, action: 'action' in rule ? rule.action : 'route' });
 			return rule;
 		} finally {
 			release();

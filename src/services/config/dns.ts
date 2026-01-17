@@ -1,5 +1,5 @@
 import { config } from '@/config';
-import type { DnsConfig, DnsRule, DnsServer, SingBoxConfig } from '@/types/singbox-config';
+import type { DnsConfig, DnsRule, DnsServer, SingBoxConfig } from '@/types/singbox';
 import { BadRequestError, ConfigValidationError, NotFoundError } from '@/utils/errors';
 import { logger } from '@/utils/logger';
 import { backupService } from '../backup';

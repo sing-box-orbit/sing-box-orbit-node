@@ -7,7 +7,7 @@ import {
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
 import { configService } from '@/services';
-import type { Service } from '@/types/singbox-config';
+import type { Service } from '@/types/singbox';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
 

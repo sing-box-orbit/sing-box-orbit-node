@@ -7,7 +7,7 @@ import {
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
 import { configService } from '@/services';
-import type { ExperimentalConfig } from '@/types/singbox-config';
+import type { ExperimentalConfig } from '@/types/singbox';
 import type { RouterType } from '../types';
 
 export function registerExperimentalRoutes(router: RouterType) {

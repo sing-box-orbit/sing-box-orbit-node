@@ -1,4 +1,4 @@
-import type { Inbound, SingBoxConfig } from '@/types/singbox-config';
+import type { Inbound, SingBoxConfig } from '@/types/singbox';
 import { BaseConfigService } from './base';
 import {
 	type CrudContext,

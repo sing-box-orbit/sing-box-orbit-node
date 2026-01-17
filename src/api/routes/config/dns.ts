@@ -8,7 +8,7 @@ import {
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
 import { dnsConfigService } from '@/services';
-import type { DnsConfig, DnsRule, DnsServer } from '@/types/singbox-config';
+import type { DnsConfig, DnsRule, DnsServer } from '@/types/singbox';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
 

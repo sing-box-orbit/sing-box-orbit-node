@@ -8,7 +8,7 @@ import {
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
 import { inboundConfigService } from '@/services';
-import type { Inbound } from '@/types/singbox-config';
+import type { Inbound } from '@/types/singbox';
 import { NotFoundError } from '@/utils/errors';
 import type { RouterType } from '../types';
 

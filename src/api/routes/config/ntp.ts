@@ -7,7 +7,7 @@ import {
 } from '@/api/schemas';
 import { handleError } from '@/api/utils';
 import { configService } from '@/services';
-import type { NtpConfig } from '@/types/singbox-config';
+import type { NtpConfig } from '@/types/singbox';
 import type { RouterType } from '../types';
 
 export function registerNtpRoutes(router: RouterType) {
