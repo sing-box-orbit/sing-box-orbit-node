@@ -1,7 +1,7 @@
 # sing-box-orbit-node
 
 [![CI](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml/badge.svg)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/lookgoodmeat/5c15334bebb54130f734a69db622379c/raw/coverage.json)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml?query=branch%3Amain)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/lookgoodmeat/5c15334bebb54130f734a69db622379c/raw/coverage.json)](https://sing-box-orbit.github.io/sing-box-orbit-node/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 REST API server for remote management of [sing-box](https://sing-box.sagernet.org/) — universal proxy platform.
