@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# Download sing-box binary for local development
+# Download sing-box binary
 # Usage: ./scripts/download-singbox.sh
+# Environment variables:
+#   SINGBOX_VERSION    - specific version to download (default: latest)
+#   SINGBOX_INSTALL_DIR - installation directory (default: ./bin)
 
 set -e
 
@@ -10,8 +13,8 @@ if [ -z "$SINGBOX_VERSION" ]; then
     echo "Fetching latest sing-box version..."
     VERSION=$(curl -s https://api.github.com/repos/SagerNet/sing-box/releases/latest | grep '"tag_name"' | sed -E 's/.*"v([^"]+)".*/\1/')
     if [ -z "$VERSION" ]; then
-        echo "Failed to fetch latest version, falling back to 1.10.0"
-        VERSION="1.10.0"
+        echo "Failed to fetch latest version, falling back to 1.12.17"
+        VERSION="1.12.17"
     fi
 else
     VERSION="$SINGBOX_VERSION"
@@ -48,9 +51,14 @@ case "$OS" in
         ;;
 esac
 
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-BIN_DIR="$PROJECT_DIR/bin"
+# Use custom install dir or default to ./bin
+if [ -z "$SINGBOX_INSTALL_DIR" ]; then
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+    PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+    BIN_DIR="$PROJECT_DIR/bin"
+else
+    BIN_DIR="$SINGBOX_INSTALL_DIR"
+fi
 FILENAME="sing-box-${VERSION}-${OS}-${ARCH}"
 URL="https://github.com/SagerNet/sing-box/releases/download/v${VERSION}/${FILENAME}.tar.gz"
 

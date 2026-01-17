@@ -1,5 +1,5 @@
-import { Value } from '@sinclair/typebox/value';
 import { Response as FetsResponse } from 'fets';
+import { Value } from 'typebox/value';
 import {
 	apiResponseSchema,
 	authHeadersSchema,
@@ -28,7 +28,7 @@ function validateSingBoxConfig(body: unknown): void {
 
 	const errors = [...Value.Errors(singBoxConfigSchema, body)];
 	if (errors.length > 0) {
-		const errorMessages = errors.slice(0, 5).map((e) => `${e.path}: ${e.message}`);
+		const errorMessages = errors.slice(0, 5).map((e) => `${e.instancePath}: ${e.message}`);
 		throw new BadRequestError(`Schema validation failed: ${errorMessages.join('; ')}`);
 	}
 }

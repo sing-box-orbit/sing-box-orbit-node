@@ -115,7 +115,12 @@ export class InboundConfigService extends BaseConfigService {
 		const release = await this.acquireLock();
 
 		try {
-			const config = await this.getConfig();
+			// Use getConfigRaw + parse to avoid deadlock (getConfig acquires read lock)
+			const configRaw = await this.getConfigRaw();
+			if (!configRaw) {
+				throw new NotFoundError('Configuration file not found');
+			}
+			const config = JSON.parse(configRaw) as SingBoxConfig;
 			const inbounds = (config.inbounds || []) as Inbound[];
 			const index = inbounds.findIndex((i) => (i as { tag?: string }).tag === tag);
 

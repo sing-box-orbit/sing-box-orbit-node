@@ -18,27 +18,26 @@ RUN bun build src/index.ts --compile --bytecode --minify --outfile ./server
 # Production stage
 FROM debian:bookworm-slim
 
+# OCI labels for GitHub Container Registry
+LABEL org.opencontainers.image.source=https://github.com/sing-box-orbit/sing-box-orbit-node
+LABEL org.opencontainers.image.description="REST API server for managing sing-box proxy instances"
+LABEL org.opencontainers.image.licenses=MIT
+
 WORKDIR /app
 
-# Install sing-box
-ARG SINGBOX_VERSION=1.10.0
+# Install dependencies for sing-box download
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
-    && ARCH=$(dpkg --print-architecture) \
-    && case "$ARCH" in \
-        amd64) SINGBOX_ARCH="amd64" ;; \
-        arm64) SINGBOX_ARCH="arm64" ;; \
-        *) echo "Unsupported architecture: $ARCH" && exit 1 ;; \
-    esac \
-    && curl -Lo /tmp/sing-box.tar.gz "https://github.com/SagerNet/sing-box/releases/download/v${SINGBOX_VERSION}/sing-box-${SINGBOX_VERSION}-linux-${SINGBOX_ARCH}.tar.gz" \
-    && tar -xzf /tmp/sing-box.tar.gz -C /tmp \
-    && mv /tmp/sing-box-${SINGBOX_VERSION}-linux-${SINGBOX_ARCH}/sing-box /usr/local/bin/sing-box \
-    && chmod +x /usr/local/bin/sing-box \
-    && rm -rf /tmp/* \
-    && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+# Copy and run sing-box download script
+ARG SINGBOX_VERSION=1.12.17
+COPY scripts/download-singbox.sh /tmp/download-singbox.sh
+RUN chmod +x /tmp/download-singbox.sh \
+    && SINGBOX_VERSION=${SINGBOX_VERSION} SINGBOX_INSTALL_DIR=/usr/local/bin /tmp/download-singbox.sh \
+    && rm /tmp/download-singbox.sh
 
 # Create sing-box config directory
 RUN mkdir -p /etc/sing-box
