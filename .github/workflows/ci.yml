@@ -55,13 +55,6 @@ jobs:
           echo "funcs=$FUNCS" >> $GITHUB_OUTPUT
           echo "### Coverage: $LINES% lines, $FUNCS% functions" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: false
-          token: ${{ secrets.CODECOV_TOKEN }}
-
       - name: Update coverage badge
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         uses: schneegans/dynamic-badges-action@v1.7.0

@@ -1,7 +1,7 @@
 # sing-box-orbit-node
 
 [![CI](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml/badge.svg)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/lookgoodmeat/5c15334bebb54130f734a69db622379c/raw/coverage.json)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/lookgoodmeat/5c15334bebb54130f734a69db622379c/raw/coverage.json)](https://github.com/sing-box-orbit/sing-box-orbit-node/actions/workflows/ci.yml?query=branch%3Amain)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 REST API сервер для удалённого управления [sing-box](https://sing-box.sagernet.org/) — универсальной прокси-платформой.
