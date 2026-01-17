@@ -18,6 +18,11 @@ RUN bun build src/index.ts --compile --bytecode --minify --outfile ./server
 # Production stage
 FROM debian:bookworm-slim
 
+# OCI labels for GitHub Container Registry
+LABEL org.opencontainers.image.source=https://github.com/sing-box-orbit/sing-box-orbit-node
+LABEL org.opencontainers.image.description="REST API server for managing sing-box proxy instances"
+LABEL org.opencontainers.image.licenses=MIT
+
 WORKDIR /app
 
 # Install sing-box
