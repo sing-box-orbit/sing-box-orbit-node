@@ -98,24 +98,29 @@ bun run dev
 
 ### Docker Compose (рекомендуется)
 
+Создайте `docker-compose.yml`:
+
+```yaml
+services:
+  sing-box-orbit-node:
+    image: ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
+    container_name: sing-box-orbit-node
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - API_KEY=your-secret-api-key
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/etc/sing-box
+      - ./logs:/app/data/logs
+```
+
 ```bash
-# Скопировать пример конфигурации
-cp docker-compose.example.yml docker-compose.yml
-
-# Создать директорию с конфигом sing-box
 mkdir -p data logs
-cat > data/config.json << 'EOF'
-{
-  "log": { "level": "info" },
-  "inbounds": [],
-  "outbounds": [{ "type": "direct", "tag": "direct" }]
-}
-EOF
-
-# Отредактировать docker-compose.yml и указать API_KEY
-# Запустить сервис
 docker compose up -d
 ```
+
+> **Примечание:** Конфигурация по умолчанию создаётся автоматически при первом запуске, если `config.json` отсутствует.
 
 ### Запуск через Docker
 
@@ -127,22 +132,6 @@ docker run -d \
   -v $(pwd)/logs:/app/data/logs \
   -e API_KEY=your-secret-key \
   ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
-```
-
-### Host network режим (для прокси-протоколов)
-
-Если sing-box требуется прямой доступ к сети (например, для tun-режима):
-
-```yaml
-services:
-  sing-box-orbit-node:
-    image: ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
-    network_mode: host
-    environment:
-      - API_KEY=your-secret-key
-    volumes:
-      - ./data:/etc/sing-box
-      - ./logs:/app/data/logs
 ```
 
 ### Пути томов

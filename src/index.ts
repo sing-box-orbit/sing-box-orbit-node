@@ -1,6 +1,6 @@
 import { app } from './app';
 import { config } from './config';
-import { logStorageService, processService } from './services';
+import { configService, logStorageService, processService } from './services';
 import { AppError, logger } from './utils';
 
 const startServer = async () => {
@@ -15,6 +15,7 @@ const startServer = async () => {
 	}
 
 	await logStorageService.init();
+	await configService.ensureConfig();
 
 	try {
 		await processService.start();

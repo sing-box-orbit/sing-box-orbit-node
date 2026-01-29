@@ -1,4 +1,4 @@
-import { rename } from 'node:fs/promises';
+import { mkdir, rename } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { spawn } from 'bun';
 import { config } from '@/config';
@@ -43,11 +43,31 @@ export interface ConfigChange {
 	newValue?: unknown;
 }
 
+const DEFAULT_CONFIG: SingBoxConfig = {
+	log: { level: 'info' },
+	inbounds: [],
+	outbounds: [{ type: 'direct', tag: 'direct' }],
+};
+
 class ConfigService {
 	private readonly configPath = config.singbox.configPath;
 	private readonly binary = config.singbox.binary;
 	private readonly rwlock = new RWLock();
 	private configCache: SingBoxConfig | null = null;
+
+	async ensureConfig(): Promise<boolean> {
+		const file = Bun.file(this.configPath);
+
+		if (await file.exists()) {
+			return false;
+		}
+
+		await mkdir(dirname(this.configPath), { recursive: true });
+		await Bun.write(this.configPath, JSON.stringify(DEFAULT_CONFIG, null, 2));
+		logger.info('Created default configuration', { path: this.configPath });
+
+		return true;
+	}
 
 	async getConfig(): Promise<SingBoxConfig> {
 		const release = await this.acquireReadLock();
