@@ -32,16 +32,22 @@ app.use('*', requestLogger);
 app.get('/favicon.ico', (c) => c.body(null, 204));
 
 if (config.isDev) {
-	const scalarBundlePath = resolve(
-		import.meta.dir,
-		'../node_modules/@scalar/api-reference/dist/browser/standalone.js',
-	);
+	const scalarRelativePath = 'node_modules/@scalar/api-reference/dist/browser/standalone.js';
+	const scalarPaths = [
+		resolve(import.meta.dir, '..', scalarRelativePath),
+		resolve(process.cwd(), scalarRelativePath),
+	];
 
 	app.get('/scalar', async () => {
-		const file = Bun.file(scalarBundlePath);
-		return new Response(file, {
-			headers: { 'Content-Type': 'application/javascript' },
-		});
+		for (const path of scalarPaths) {
+			const file = Bun.file(path);
+			if (await file.exists()) {
+				return new Response(file, {
+					headers: { 'Content-Type': 'application/javascript' },
+				});
+			}
+		}
+		return new Response('Scalar standalone.js not found', { status: 404 });
 	});
 
 	app.get(

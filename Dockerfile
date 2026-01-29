@@ -45,6 +45,10 @@ RUN mkdir -p /etc/sing-box
 # Copy standalone executable
 COPY --from=builder /app/server ./server
 
+# Copy Scalar standalone.js for API docs (used in dev mode)
+RUN mkdir -p ./node_modules/@scalar/api-reference/dist/browser
+COPY --from=builder /app/node_modules/@scalar/api-reference/dist/browser/standalone.js ./node_modules/@scalar/api-reference/dist/browser/standalone.js
+
 # Environment variables
 ENV NODE_ENV=production
 ENV PORT=3333
