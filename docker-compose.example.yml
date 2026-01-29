@@ -1,0 +1,12 @@
+services:
+  sing-box-orbit-node:
+    image: ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
+    container_name: sing-box-orbit-node
+    network_mode: host
+    restart: unless-stopped
+    environment:
+      - API_KEY=your-secret-api-key
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/etc/sing-box
+      - ./logs:/app/data/logs

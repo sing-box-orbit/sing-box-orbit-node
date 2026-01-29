@@ -12,8 +12,10 @@ function timingSafeCompare(a: string, b: string): boolean {
 	return a.length === b.length && timingSafeEqual(bufA, bufB);
 }
 
+const PUBLIC_PATHS = ['/health'];
+
 export const authMiddleware = createMiddleware(async (c, next) => {
-	if (!config.apiKey) {
+	if (!config.apiKey || PUBLIC_PATHS.includes(c.req.path)) {
 		await next();
 		return;
 	}

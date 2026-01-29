@@ -2592,13 +2592,35 @@ describe('API with Authentication', () => {
 
 		const { app: authApp } = await import('@/app');
 
-		const res = await authApp.request('/health');
+		const res = await authApp.request('/server/status');
 
 		expect(res.status).toBe(401);
 
 		const body = await res.json();
 		expect(body.success).toBe(false);
 		expect(body.code).toBe('UNAUTHORIZED');
+	});
+
+	test('should allow /health without authentication', async () => {
+		mock.module('@/config', () => ({
+			config: {
+				isDev: true,
+				isProd: false,
+				apiKey: API_KEY,
+				rateLimit: {
+					enabled: false,
+					maxRequests: 100,
+					windowMs: 60000,
+				},
+				logLevel: 'error',
+			},
+		}));
+
+		const { app: authApp } = await import('@/app');
+
+		const res = await authApp.request('/health');
+
+		expect(res.status).toBe(200);
 	});
 
 	test('should accept authenticated requests with Bearer token', async () => {

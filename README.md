@@ -96,17 +96,65 @@ Interactive documentation available at `http://localhost:3333/docs`
 
 ## Docker
 
-```bash
-# Build image
-docker build -t sing-box-orbit-node .
+### Using Docker Compose (recommended)
 
-# Run container
-docker run -d \
-  -p 3333:3333 \
-  -v $(pwd)/data:/app/data \
-  -e API_KEY=your-secret-key \
-  sing-box-orbit-node
+```bash
+# Copy example configuration
+cp docker-compose.example.yml docker-compose.yml
+
+# Create data directory with sing-box config
+mkdir -p data logs
+cat > data/config.json << 'EOF'
+{
+  "log": { "level": "info" },
+  "inbounds": [],
+  "outbounds": [{ "type": "direct", "tag": "direct" }]
+}
+EOF
+
+# Edit docker-compose.yml and set your API_KEY
+# Start the service
+docker compose up -d
 ```
+
+### Using Docker directly
+
+```bash
+docker run -d \
+  --name sing-box-orbit-node \
+  -p 3333:3333 \
+  -v $(pwd)/data:/etc/sing-box \
+  -v $(pwd)/logs:/app/data/logs \
+  -e API_KEY=your-secret-key \
+  ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
+```
+
+### Host network mode (for proxy protocols)
+
+If sing-box needs direct network access (e.g., for tun mode or specific ports):
+
+```yaml
+services:
+  sing-box-orbit-node:
+    image: ghcr.io/sing-box-orbit/sing-box-orbit-node:latest
+    network_mode: host
+    environment:
+      - API_KEY=your-secret-key
+    volumes:
+      - ./data:/etc/sing-box
+      - ./logs:/app/data/logs
+```
+
+### Volume paths
+
+| Host path | Container path | Description |
+|-----------|----------------|-------------|
+| `./data` | `/etc/sing-box` | sing-box config and working directory |
+| `./logs` | `/app/data/logs` | Application logs |
+
+### Health check
+
+The `/health` endpoint is publicly accessible (no authentication required) for container orchestration compatibility.
 
 ## Tech Stack
 
