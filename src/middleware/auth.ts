@@ -13,9 +13,13 @@ function timingSafeCompare(a: string, b: string): boolean {
 }
 
 const PUBLIC_PATHS = ['/health'];
+const DEV_PUBLIC_PATHS = ['/docs', '/openapi.json'];
 
 export const authMiddleware = createMiddleware(async (c, next) => {
-	if (!config.apiKey || PUBLIC_PATHS.includes(c.req.path)) {
+	const isPublic = PUBLIC_PATHS.includes(c.req.path);
+	const isDevPublic = config.isDev && DEV_PUBLIC_PATHS.includes(c.req.path);
+
+	if (!config.apiKey || isPublic || isDevPublic) {
 		await next();
 		return;
 	}
