@@ -1,5 +1,6 @@
 import { Response as FetsResponse } from 'fets';
 import { authHeadersSchema, errorResponseSchema, healthResponseSchema } from '@/api/schemas';
+import packageJson from '../../../package.json';
 import type { RouterType } from './types';
 
 export function registerHealthRoutes(router: RouterType) {
@@ -21,7 +22,7 @@ export function registerHealthRoutes(router: RouterType) {
 			return FetsResponse.json({
 				status: 'ok' as const,
 				timestamp: new Date().toISOString(),
-				version: '0.1.0',
+				version: packageJson.version,
 			});
 		},
 	});
