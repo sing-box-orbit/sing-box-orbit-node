@@ -19,6 +19,7 @@
     "test:integration": "bun test src/__tests__/integration"
   },
   "dependencies": {
+    "@scalar/api-reference": "^1.44.3",
     "@scalar/hono-api-reference": "^0.9.38",
     "@zhexin/typebox": "npm:@jsr/zhexin__typebox",
     "envalid": "^8.1.1",

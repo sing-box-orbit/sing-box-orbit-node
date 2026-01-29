@@ -1,4 +1,5 @@
-import { apiReference } from '@scalar/hono-api-reference';
+import { resolve } from 'node:path';
+import { Scalar } from '@scalar/hono-api-reference';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { fetsRouter } from './api/fets-router';
@@ -30,11 +31,24 @@ app.use('*', requestLogger);
 app.use('*', authMiddleware);
 
 if (config.isDev) {
+	const scalarBundlePath = resolve(
+		import.meta.dir,
+		'../node_modules/@scalar/api-reference/dist/browser/standalone.js',
+	);
+
+	app.get('/scalar/standalone.js', async () => {
+		const file = Bun.file(scalarBundlePath);
+		return new Response(file, {
+			headers: { 'Content-Type': 'application/javascript' },
+		});
+	});
+
 	app.get(
 		'/docs',
-		apiReference({
+		Scalar({
 			url: '/openapi.json',
 			theme: 'kepler',
+			cdn: '/scalar',
 		}),
 	);
 }
