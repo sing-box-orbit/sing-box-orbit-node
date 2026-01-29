@@ -28,7 +28,8 @@ app.use('*', securityHeaders);
 app.use('*', sanitizeMiddleware);
 app.use('*', rateLimiter);
 app.use('*', requestLogger);
-app.use('*', authMiddleware);
+
+app.get('/favicon.ico', (c) => c.body(null, 204));
 
 if (config.isDev) {
 	const scalarBundlePath = resolve(
@@ -36,7 +37,7 @@ if (config.isDev) {
 		'../node_modules/@scalar/api-reference/dist/browser/standalone.js',
 	);
 
-	app.get('/scalar/standalone.js', async () => {
+	app.get('/scalar', async () => {
 		const file = Bun.file(scalarBundlePath);
 		return new Response(file, {
 			headers: { 'Content-Type': 'application/javascript' },
@@ -52,6 +53,8 @@ if (config.isDev) {
 		}),
 	);
 }
+
+app.use('*', authMiddleware);
 
 app.all('*', async (c) => {
 	if (config.isProd && (c.req.path === '/openapi.json' || c.req.path === '/docs')) {
